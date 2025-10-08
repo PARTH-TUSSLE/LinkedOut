@@ -1,0 +1,113 @@
+
+
+generator client {
+  provider = "prisma-client-js"
+  
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+
+model User {
+  id                  Int         @id @default(autoincrement())
+  name                String
+  username            String      @unique
+  email               String      @unique
+  active              Boolean     @default(true)
+  profilePicture      String      @default("default.jpeg")
+  createdAt           DateTime    @default(now())
+  token               String      @default("")
+  
+  // Relations
+  profile             Profile?    // One-to-one: each user can have one profile
+  posts               POST[]
+  sentConnections     Connection[]  @relation("sentConnections")
+  receivedConnections Connection[]  @relation("receivedConnections")
+  comments            Comment[]
+}
+
+
+model Profile {
+  id           Int      @id @default(autoincrement())
+  userId       Int      @unique
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  bio          String?   @default("")
+  occupationStatus  String?   @default("")  
+  location     String?   @default("")
+  
+  education    Education[]   
+  workHistory  WorkHistory[]  
+}
+
+model Education {
+  id           Int     @id @default(autoincrement())
+  profileId    Int     
+  profile      Profile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+
+  school       String  @default("")
+  degree       String  @default("")
+  fieldOfStudy String  @default("")
+  
+  startYear    Int?    
+  endYear      Int?    
+
+}
+
+
+model WorkHistory {
+  id          Int     @id @default(autoincrement())
+  profileId   Int     
+  profile     Profile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  
+  company     String  @default("")
+  location    String?   @default("")
+  position    String  @default("")
+  years       String  @default("") 
+  
+  startDate   DateTime?  
+  endDate     DateTime?  
+  description String?   @default("")
+}
+
+model POST {
+ postId         Int         @id @default(autoincrement())
+ creatorId      Int         
+ creator        User        @relation(fields: [creatorId], references: [id])
+ body           String 
+ likes          Int         @default(0)
+ createdAt      DateTime    @default(now())
+ updatedAt      DateTime    @updatedAt
+ media          String      @default("")
+ active         Boolean     @default(true)
+ fileType       String      @default("")
+ comments       Comment[]
+}
+
+
+
+
+model Connection {
+  connectionId              Int       @id @default(autoincrement())
+  senderId        Int       
+  sender          User      @relation("sentConnections", fields: [senderId], references: [id])
+  receiverId      Int
+  receiver        User      @relation("receivedConnections",fields: [receiverId],references: [id])
+  status          String    @default("pending")
+  @@unique([senderId, receiverId])
+}
+
+
+
+
+model Comment {
+  commentId         Int     @id @default(autoincrement())
+  body              String  
+  creatorId         Int
+  creator           User    @relation(fields: [creatorId], references: [id])
+  postId            Int
+  post              POST    @relation(fields: [postId], references: [postId])
+}
