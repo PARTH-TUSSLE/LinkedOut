@@ -19,7 +19,6 @@ model User {
   active              Boolean     @default(true)
   profilePicture      String      @default("default.jpeg")
   createdAt           DateTime    @default(now())
-  token               String      @default("")
   
   // Relations
   profile             Profile?    // One-to-one: each user can have one profile
