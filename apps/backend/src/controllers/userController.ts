@@ -1,16 +1,17 @@
 import { Request, Response } from "express";
-import { Jwt } from "jsonwebtoken";
+import jwt from "jsonwebtoken";
 import {client} from "@repo/db/client";
-import { SignUpSchema } from "@repo/common/types"
+import { SignUpSchema, SignInSchema } from "@repo/common/types"
 import bcrypt from 'bcrypt';
 
+const secret = process.env.JWT_SECRET || "acbdrandom"
 
 export const signupController = async (req: Request, res: Response) => {
 
-  const parsedData = SignUpSchema.safeParse(req.body);
+  const parsedData = await SignUpSchema.safeParse(req.body);
   
   if (!parsedData.success) {
-    res.json({
+    res.status(400).json({
       msg: "Incorrect inputs !"
     })
     return
@@ -18,8 +19,6 @@ export const signupController = async (req: Request, res: Response) => {
 
   try {
     const hashedPass = await bcrypt.hash(parsedData.data.password, 10); 
-
-    console.log(hashedPass)
 
     const user = await client.user.create({
       data: {
@@ -30,19 +29,78 @@ export const signupController = async (req: Request, res: Response) => {
       }
     })
 
-    res.status(200).json({
+    res.status(201).json({
       msg: "User created successfully !",
     })
 
 
   } catch (error) {
 
-    res.json({
+    res.status(409).json({
       msg: "username or email already taken" 
     })
 
   }
 
 };
+
+
+export const signInController = async ( req: Request, res: Response ) => {
+  const parsedData = await SignInSchema.safeParse(req.body);
+
+  if ( !parsedData.success ) {
+    res.status(400).json({
+      msg: "Incorrect inputs"
+    })
+    return
+  }
+
+  try {
+
+    const { username, email, password } = parsedData.data;
+
+
+    const user = await client.user.findFirst({
+      where: {
+        OR: [
+          { username: username },
+          { email: email }
+        ],
+      }
+    })
+
+    if (!user) {
+      
+      res.status(401).json({
+        msg: "Wrong credentials!"
+      })
+
+      return
+
+    } 
+
+    const isMatch = await bcrypt.compare(password, user.password);
+
+    if ( isMatch === false ) {
+      res.status(401).json({
+        msg: "Wrong credentials!",
+      });
+    } else {
+
+     
+      const token = jwt.sign({ id: user.id }, secret!)
+      res.status(200).json ({
+        msg: "User signed in successfully!",
+        token
+      })
+    }
+   
+    
+  } catch (error) {
+    res.status(500).json({
+      msg: "Unauthorized!"})
+  }
+
+}
 
 

@@ -7,7 +7,7 @@
   "scripts": {
     "build": "tsc -b",
     "start": "node dist/index.js",
-    "dev": "pnpm run build && pnpm run start"
+    "dev": "pnpm run build && nodemon dist/index.js"
   },
   "devDependencies": {
     "@repo/common": "workspace:*",
@@ -26,6 +26,7 @@
     "cors": "^2.8.5",
     "dotenv": "^17.2.3",
     "express": "^5.1.0",
-    "jsonwebtoken": "^9.0.2"
+    "jsonwebtoken": "^9.0.2",
+    "nodemon": "^3.1.10"
   }
 }

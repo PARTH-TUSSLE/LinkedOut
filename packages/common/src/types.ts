@@ -6,3 +6,9 @@ export const SignUpSchema = z.object({
   email: z.string(),
   password: z.string().min(6)
 })
+
+export const SignInSchema = z.object({
+  username: z.string().min(3).max(50).optional(),
+  email: z.string().optional(),
+  password: z.string().min(6),
+});
