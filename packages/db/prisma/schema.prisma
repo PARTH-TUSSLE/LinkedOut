@@ -16,6 +16,7 @@ model User {
   name                String
   username            String      @unique
   email               String      @unique
+  password            String
   active              Boolean     @default(true)
   profilePicture      String      @default("default.jpeg")
   createdAt           DateTime    @default(now())

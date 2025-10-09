@@ -2,6 +2,8 @@ import { Request, Response } from "express";
 import { Jwt } from "jsonwebtoken";
 import {client} from "@repo/db/client";
 import { SignUpSchema } from "@repo/common/types"
+import bcrypt from 'bcrypt';
+
 
 export const signupController = async (req: Request, res: Response) => {
 
@@ -15,17 +17,21 @@ export const signupController = async (req: Request, res: Response) => {
   }
 
   try {
+    const hashedPass = await bcrypt.hash(parsedData.data.password, 10); 
+
+    console.log(hashedPass)
 
     const user = await client.user.create({
       data: {
         name: parsedData.data.name,
         username: parsedData.data.username,
-        email: parsedData.data.email
+        email: parsedData.data.email,
+        password: hashedPass
       }
     })
 
     res.status(200).json({
-      msg: "User created successfully !"
+      msg: "User created successfully !",
     })
 
 
