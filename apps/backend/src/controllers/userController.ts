@@ -4,7 +4,7 @@ import {client} from "@repo/db/client";
 import { SignUpSchema, SignInSchema } from "@repo/common/types"
 import bcrypt from 'bcrypt';
 
-const secret = process.env.JWT_SECRET || "acbdrandom"
+ 
 
 export const signupController = async (req: Request, res: Response) => {
 
@@ -29,8 +29,16 @@ export const signupController = async (req: Request, res: Response) => {
       }
     })
 
+    const profile = await client.profile.create({
+      data: {
+        userId: user.id
+      }
+    })
+
     res.status(201).json({
       msg: "User created successfully !",
+      user,
+      profile
     })
 
 
@@ -88,7 +96,7 @@ export const signInController = async ( req: Request, res: Response ) => {
     } else {
 
      
-      const token = jwt.sign({ id: user.id }, secret!)
+      const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET!);
       res.status(200).json ({
         msg: "User signed in successfully!",
         token
