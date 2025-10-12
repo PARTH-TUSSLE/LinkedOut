@@ -1,5 +1,7 @@
 import { NextFunction, Request, Response } from "express";
-import jwt, { decode, JwtPayload } from "jsonwebtoken";
+import jwt, {  JwtPayload } from "jsonwebtoken";
+import "dotenv/config";
+
 
 declare global {
   namespace Express {
@@ -13,7 +15,8 @@ export const authMiddleware = ( req: Request, res: Response, next: NextFunction 
 
   const token = req.headers["authorization"];
 
-  if ( !token ) {
+  try {
+    if ( !token ) {
     res.json({
       msg: "Unauthorized!"
     })
@@ -31,9 +34,16 @@ export const authMiddleware = ( req: Request, res: Response, next: NextFunction 
 
   if (decoded) {
     req.userId = (decoded as JwtPayload).id;
-  } else {
-    res.json({
-      msg: "Unauthorized!"
-    })
   }
+
+  next();
+
+
+  } catch (error) {
+    res.json({
+      msg: "Unauthorized!",
+    });
+  }
+
+
 }
