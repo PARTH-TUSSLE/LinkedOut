@@ -116,3 +116,115 @@ export const uploadProfilePicture = async (req: Request, res: Response) => {
     return res.status(500).json({ msg: "Some error occurred while updating" });
   }
 };
+
+
+export const updateUserController = async ( req: Request, res:Response ) => {
+
+  try {
+      const userId = req.userId;
+
+      if ( !userId ) {
+        res.json({
+          msg: "You're not unauthorized!"
+        })
+        return
+      }
+
+      const { username = "", email = "" }: { username?: string; email?: string } = req.body;
+
+      const user = await client.user.findFirst({
+        where: {
+          id: Number(userId),
+        },
+      });
+
+      if (!user) {
+        res.json({
+          msg: "User not found!",
+        });
+        return;
+      }
+
+      const existingUser = await client.user.findFirst({
+        where: {
+          OR: [{ username: username }, { email: email }],
+        },
+      });
+      
+      if (!existingUser) {
+        const updatedUser = await client.user.update({
+          where: {
+            id: Number(userId)
+          },
+          data: {
+            username: username,
+            email: email
+          }
+        })
+        res.json({ msg: "User updated successfully!", updatedUser });
+        return;
+      }
+
+      
+      if (existingUser.id === user.id) {
+       const updatedUser = await client.user.update({
+         where: {
+           id: Number(userId),
+         },
+         data: {
+           username: username,
+           email: email,
+         },
+       });
+        res.json({ msg: "User updated successfully!", updatedUser});
+        return;
+      }
+
+      res.status(409).json({ msg: "Username or email already taken!" });
+      return;
+
+  } catch (error) {
+    res.status(500).json({
+      msg: "Some unexpected error ocuured!"
+    })
+  }
+
+}
+
+export const getUserAndProfileController = async ( req: Request, res:Response ) => {
+ 
+  try {
+     const userId = req.userId;
+
+     const user = await client.user.findFirst({
+       where: {
+         id: Number(userId),
+       },
+     });
+
+     if (!user) {
+       res.json({
+         msg: "user not found!",
+       });
+       return
+     }
+
+     const profile = await client.profile.findFirst({
+       where: {
+         userId: Number(userId)
+       },
+     });
+
+     res.json({
+      user,
+      profile
+     })
+
+  } catch (error) {
+    res.status(500).json({
+      msg: "Some unexpected error occured !"
+    })
+  }
+  
+
+}

@@ -1,7 +1,9 @@
 import { Router } from "express";
 import {
+  getUserAndProfileController,
   signInController,
   signupController,
+  updateUserController,
   uploadProfilePicture,
 } from "../controllers/userController.js";
 import multer from "multer";
@@ -27,5 +29,7 @@ userRouter.post(
 
 userRouter.post("/signup", signupController);
 userRouter.post("/signin", signInController);
+userRouter.post("/update_user", authMiddleware, updateUserController)
+userRouter.get("/get_user_and_profile", authMiddleware, getUserAndProfileController )
 
 export default userRouter;
