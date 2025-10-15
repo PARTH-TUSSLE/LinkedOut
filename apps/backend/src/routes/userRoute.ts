@@ -4,6 +4,7 @@ import {
   signInController,
   signupController,
   updateUserController,
+  updateUserProfileController,
   uploadProfilePicture,
 } from "../controllers/userController.js";
 import multer from "multer";
@@ -31,5 +32,6 @@ userRouter.post("/signup", signupController);
 userRouter.post("/signin", signInController);
 userRouter.post("/update_user", authMiddleware, updateUserController)
 userRouter.get("/get_user_and_profile", authMiddleware, getUserAndProfileController )
+userRouter.post("/update_user_profile", authMiddleware, updateUserProfileController)
 
 export default userRouter;

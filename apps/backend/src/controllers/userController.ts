@@ -92,17 +92,14 @@ export const signInController = async (req: Request, res: Response) => {
   }
 };
 
-
 export const uploadProfilePicture = async (req: Request, res: Response) => {
   try {
-    
     const userId = req.userId;
 
     if (!req.file || !req.file.filename) {
       return res.status(400).json({ msg: "No file uploaded" });
     }
 
-  
     const updated = await client.user.update({
       where: { id: Number(userId) },
       data: { profilePicture: req.file.filename },
@@ -117,114 +114,171 @@ export const uploadProfilePicture = async (req: Request, res: Response) => {
   }
 };
 
-
-export const updateUserController = async ( req: Request, res:Response ) => {
-
+export const updateUserController = async (req: Request, res: Response) => {
   try {
-      const userId = req.userId;
+    const userId = req.userId;
 
-      if ( !userId ) {
-        res.json({
-          msg: "You're not unauthorized!"
-        })
-        return
-      }
+    if (!userId) {
+      res.json({
+        msg: "You're not unauthorized!",
+      });
+      return;
+    }
 
-      const { username = "", email = "" }: { username?: string; email?: string } = req.body;
+    const { username = "", email = "" }: { username?: string; email?: string } =
+      req.body;
 
-      const user = await client.user.findFirst({
+    const user = await client.user.findFirst({
+      where: {
+        id: Number(userId),
+      },
+    });
+
+    if (!user) {
+      res.json({
+        msg: "User not found!",
+      });
+      return;
+    }
+
+    const existingUser = await client.user.findFirst({
+      where: {
+        OR: [{ username: username }, { email: email }],
+      },
+    });
+
+    if (!existingUser) {
+      const updatedUser = await client.user.update({
         where: {
           id: Number(userId),
         },
-      });
-
-      if (!user) {
-        res.json({
-          msg: "User not found!",
-        });
-        return;
-      }
-
-      const existingUser = await client.user.findFirst({
-        where: {
-          OR: [{ username: username }, { email: email }],
+        data: {
+          username: username,
+          email: email,
         },
       });
-      
-      if (!existingUser) {
-        const updatedUser = await client.user.update({
-          where: {
-            id: Number(userId)
-          },
-          data: {
-            username: username,
-            email: email
-          }
-        })
-        res.json({ msg: "User updated successfully!", updatedUser });
-        return;
-      }
-
-      
-      if (existingUser.id === user.id) {
-       const updatedUser = await client.user.update({
-         where: {
-           id: Number(userId),
-         },
-         data: {
-           username: username,
-           email: email,
-         },
-       });
-        res.json({ msg: "User updated successfully!", updatedUser});
-        return;
-      }
-
-      res.status(409).json({ msg: "Username or email already taken!" });
+      res.json({ msg: "User updated successfully!", updatedUser });
       return;
+    }
 
+    if (existingUser.id === user.id) {
+      const updatedUser = await client.user.update({
+        where: {
+          id: Number(userId),
+        },
+        data: {
+          username: username,
+          email: email,
+        },
+      });
+      res.json({ msg: "User updated successfully!", updatedUser });
+      return;
+    }
+
+    res.status(409).json({ msg: "Username or email already taken!" });
+    return;
   } catch (error) {
     res.status(500).json({
-      msg: "Some unexpected error ocuured!"
-    })
+      msg: "Some unexpected error ocuured!",
+    });
   }
+};
 
-}
-
-export const getUserAndProfileController = async ( req: Request, res:Response ) => {
- 
+export const getUserAndProfileController = async (
+  req: Request,
+  res: Response
+) => {
   try {
-     const userId = req.userId;
+    const userId = req.userId;
 
-     const user = await client.user.findFirst({
-       where: {
-         id: Number(userId),
-       },
-     });
+    const user = await client.user.findFirst({
+      where: {
+        id: Number(userId),
+      },
+    });
 
-     if (!user) {
-       res.json({
-         msg: "user not found!",
-       });
-       return
-     }
+    if (!user) {
+      res.json({
+        msg: "user not found!",
+      });
+      return;
+    }
 
-     const profile = await client.profile.findFirst({
-       where: {
-         userId: Number(userId)
-       },
-     });
+    const profile = await client.profile.findFirst({
+      where: {
+        userId: Number(userId),
+      },
+    });
 
-     res.json({
+    res.json({
       user,
-      profile
-     })
-
+      profile,
+    });
   } catch (error) {
     res.status(500).json({
-      msg: "Some unexpected error occured !"
-    })
+      msg: "Some unexpected error occured !",
+    });
   }
-  
+};
 
-}
+export const updateUserProfileController = async (
+  req: Request,
+  res: Response
+) => {
+  try {
+    const userId = req.userId;
+    const { bio, occupationStatus, location, education, workHistory } = req.body;
+
+    if (!userId) {
+      res.json({
+        msg: "User not found!",
+      });
+      return;
+    }
+
+    const profileToUpdate = await client.profile.findFirst({
+      where: {
+        userId: Number(userId),
+      },
+    });
+
+    if (!profileToUpdate) {
+      res.json({
+        msg: "No profile found!",
+      });
+      return;
+    }
+
+    const updatedProfile = await client.profile.update({
+      where: { userId: Number(userId) },
+      data: {
+        // Update simple fields
+        bio: bio,
+        occupationStatus: occupationStatus,
+        location: location,
+
+        // Replace all education records
+        education: {
+          deleteMany: {}, // Delete all existing education
+          create: education, // Create new ones from request
+        },
+
+        // Replace all work history records
+        workHistory: {
+          deleteMany: {}, // Delete all existing work history
+          create: workHistory, // Create new ones from request
+        },
+      },
+    });
+
+    res.json({
+      msg: "Profile updated successfully!",
+      updatedProfile,
+    });
+  } catch (error) {
+    res.status(500).json({
+      msg: "Some unexpected error occurred!",
+      error,
+    });
+  }
+};
