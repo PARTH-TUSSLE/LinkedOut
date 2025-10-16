@@ -1,5 +1,6 @@
 import { Router } from "express";
 import {
+  downloadProfileController,
   getAllUsersController,
   getUserAndProfileController,
   signInController,
@@ -35,7 +36,7 @@ userRouter.post("/update_user", authMiddleware, updateUserController)
 userRouter.get("/get_user_and_profile", authMiddleware, getUserAndProfileController )
 userRouter.post("/update_user_profile", authMiddleware, updateUserProfileController);
 userRouter.get("/getAllUsers", getAllUsersController);
-
+userRouter.get("/user/downloadResume/", downloadProfileController)
 
 
 export default userRouter;

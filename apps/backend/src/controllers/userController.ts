@@ -4,6 +4,140 @@ import { client } from "@repo/db/client";
 import { SignUpSchema, SignInSchema } from "@repo/common/types";
 import bcrypt from "bcrypt";
 import "dotenv/config";
+import PDFDocument from "pdfkit";
+import randomString from "randomstring";
+import fs from "fs";
+
+const convertUserDataToPDF = async (userData: any): Promise<string> => {
+  const doc = new PDFDocument();
+
+  const outputPath = `${randomString.generate(20)}.pdf`;
+
+  const stream = fs.createWriteStream(`uploads/${outputPath}`);
+
+  doc.pipe(stream);
+
+  // Basic information with better spacing
+  doc.fontSize(20).text("RESUME", { align: "center" });
+  doc.moveDown(1.5);
+
+  // Add profile picture if exists - properly centered
+  if (
+    userData.profilePicture &&
+    fs.existsSync(`uploads/${userData.profilePicture}`)
+  ) {
+    // Calculate center position for image
+    const pageWidth = doc.page.width;
+    const imageWidth = 120;
+    const imageHeight = 120;
+    const imageX = (pageWidth - imageWidth) / 2;
+    const imageY = doc.y;
+
+    doc.image(`uploads/${userData.profilePicture}`, imageX, imageY, {
+      width: imageWidth,
+      height: imageHeight,
+      fit: [imageWidth, imageHeight],
+    });
+
+    // Move Y position past the image
+    doc.y = imageY + imageHeight + 20; // 20 points spacing after image
+  } else {
+    doc.moveDown(1);
+  }
+
+  // Personal information with better spacing
+  doc.fontSize(16).text(`Name: ${userData.name || "N/A"}`);
+  doc.moveDown(0.5);
+
+  doc.fontSize(14).text(`Email: ${userData.email || "N/A"}`);
+  doc.moveDown(0.5);
+
+  doc.fontSize(14).text(`About: ${userData.profile?.bio || "N/A"}`);
+  doc.moveDown(0.5);
+
+  doc
+    .fontSize(14)
+    .text(`Current Position: ${userData.profile?.occupationStatus || "N/A"}`);
+  doc.moveDown(0.5);
+
+  doc.fontSize(14).text(`Location: ${userData.profile?.location || "N/A"}`);
+  doc.moveDown(1.5);
+
+  // Education section with better spacing
+  doc.fontSize(16).text("EDUCATION:");
+  doc.moveDown(0.8);
+
+  if (userData.profile?.education && userData.profile.education.length > 0) {
+    userData.profile.education.forEach((education: any) => {
+      doc.fontSize(12).text(`• School: ${education.school || "N/A"}`);
+      doc.moveDown(0.2);
+      doc.fontSize(12).text(`  Degree: ${education.degree || "N/A"}`);
+      doc.moveDown(0.2);
+      doc
+        .fontSize(12)
+        .text(`  Field of Study: ${education.fieldOfStudy || "N/A"}`);
+      doc.moveDown(0.2);
+      doc
+        .fontSize(12)
+        .text(
+          `  Years: ${education.startYear || "N/A"} - ${education.endYear || "N/A"}`
+        );
+      doc.moveDown(0.8);
+    });
+  } else {
+    doc.fontSize(12).text("No education information available");
+    doc.moveDown(0.8);
+  }
+  doc.moveDown(0.5);
+
+  // Work Experience section with better spacing
+  doc.fontSize(16).text("WORK EXPERIENCE:");
+  doc.moveDown(0.8);
+
+  if (
+    userData.profile?.workHistory &&
+    userData.profile.workHistory.length > 0
+  ) {
+    userData.profile.workHistory.forEach((work: any) => {
+      doc.fontSize(12).text(`• Company: ${work.company || "N/A"}`);
+      doc.moveDown(0.2);
+      doc.fontSize(12).text(`  Position: ${work.position || "N/A"}`);
+      doc.moveDown(0.2);
+      doc.fontSize(12).text(`  Location: ${work.location || "N/A"}`);
+      doc.moveDown(0.2);
+      doc
+        .fontSize(12)
+        .text(
+          `  Duration: ${work.startDate || "N/A"} - ${work.endDate || "N/A"}`
+        );
+      doc.moveDown(0.2);
+      doc.fontSize(12).text(`  Years: ${work.years || "N/A"}`);
+      if (work.description) {
+        doc.moveDown(0.2);
+        doc.fontSize(12).text(`  Description: ${work.description}`);
+      }
+      doc.moveDown(0.8);
+    });
+  } else {
+    doc.fontSize(12).text("No work experience available");
+    doc.moveDown(0.8);
+  }
+
+  // Add some breathing space at the end
+  doc.moveDown(1);
+
+  doc.end();
+
+  // Return a promise that resolves when the PDF is fully written
+  return new Promise((resolve, reject) => {
+    stream.on("finish", () => {
+      resolve(outputPath);
+    });
+    stream.on("error", (error) => {
+      reject(error);
+    });
+  });
+};
 
 export const signupController = async (req: Request, res: Response) => {
   const parsedData = await SignUpSchema.safeParse(req.body);
@@ -281,7 +415,6 @@ export const updateUserProfileController = async (
   }
 };
 
-
 // Function to get all profiles with user data (equivalent to your MongoDB populate example)
 export const getAllUsersController = async (req: Request, res: Response) => {
   try {
@@ -305,6 +438,99 @@ export const getAllUsersController = async (req: Request, res: Response) => {
     return res.status(500).json({
       message:
         error instanceof Error ? error.message : "Unknown error occurred",
+    });
+  }
+};
+
+export const downloadProfileController = async (
+  req: Request,
+  res: Response
+) => {
+  try {
+    const userId = req.query.id;
+    
+
+    if (!userId) {
+      return res.status(400).json({
+        msg: "User ID is required",
+      });
+    }
+
+    const profile = await client.user.findFirst({
+      where: {
+        id: Number(userId),
+      },
+      include: {
+        profile: {
+          select: {
+            bio: true,
+            occupationStatus: true,
+            location: true,
+            education: {
+              select: {
+                school: true,
+                degree: true,
+                fieldOfStudy: true,
+                startYear: true,
+                endYear: true,
+              },
+            },
+            workHistory: {
+              select: {
+                company: true,
+                location: true,
+                position: true,
+                years: true,
+                startDate: true,
+                endDate: true,
+                description: true,
+              },
+            },
+          },
+        },
+      },
+    });
+
+    if (!profile) {
+      return res.status(404).json({
+        msg: "User not found",
+      });
+    }
+
+    // Generate PDF
+    const outputPath = await convertUserDataToPDF(profile);
+    const fullPath = `uploads/${outputPath}`;
+
+    // Set proper headers for PDF download
+    res.setHeader("Content-Type", "application/pdf");
+    res.setHeader(
+      "Content-Disposition",
+      `attachment; filename="${profile.name || "user"}_resume.pdf"`
+    );
+
+    // Create read stream and pipe to response
+    const fileStream = fs.createReadStream(fullPath);
+
+    fileStream.on("error", (error) => {
+      console.error("File stream error:", error);
+      return res.status(500).json({
+        msg: "Error reading generated PDF",
+      });
+    });
+
+    fileStream.on("end", () => {
+      // Clean up the generated file after sending
+      fs.unlink(fullPath, (err) => {
+        if (err) console.error("Error deleting temp file:", err);
+      });
+    });
+
+    fileStream.pipe(res);
+  } catch (error) {
+    console.error("Download profile error:", error);
+    res.status(500).json({
+      msg: "Some unexpected error occurred!",
+      error: error instanceof Error ? error.message : "Unknown error",
     });
   }
 };
