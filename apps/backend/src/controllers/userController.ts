@@ -227,7 +227,8 @@ export const updateUserProfileController = async (
 ) => {
   try {
     const userId = req.userId;
-    const { bio, occupationStatus, location, education, workHistory } = req.body;
+    const { bio, occupationStatus, location, education, workHistory } =
+      req.body;
 
     if (!userId) {
       res.json({
@@ -252,21 +253,18 @@ export const updateUserProfileController = async (
     const updatedProfile = await client.profile.update({
       where: { userId: Number(userId) },
       data: {
-        // Update simple fields
         bio: bio,
         occupationStatus: occupationStatus,
         location: location,
 
-        // Replace all education records
         education: {
-          deleteMany: {}, // Delete all existing education
-          create: education, // Create new ones from request
+          deleteMany: {},
+          create: education,
         },
 
-        // Replace all work history records
         workHistory: {
-          deleteMany: {}, // Delete all existing work history
-          create: workHistory, // Create new ones from request
+          deleteMany: {},
+          create: workHistory,
         },
       },
     });
@@ -279,6 +277,34 @@ export const updateUserProfileController = async (
     res.status(500).json({
       msg: "Some unexpected error occurred!",
       error,
+    });
+  }
+};
+
+
+// Function to get all profiles with user data (equivalent to your MongoDB populate example)
+export const getAllUsersController = async (req: Request, res: Response) => {
+  try {
+    const profiles = await client.profile.findMany({
+      include: {
+        user: {
+          select: {
+            name: true,
+            username: true,
+            email: true,
+            profilePicture: true,
+          },
+        },
+        education: true,
+        workHistory: true,
+      },
+    });
+
+    return res.json({ profiles });
+  } catch (error) {
+    return res.status(500).json({
+      message:
+        error instanceof Error ? error.message : "Unknown error occurred",
     });
   }
 };

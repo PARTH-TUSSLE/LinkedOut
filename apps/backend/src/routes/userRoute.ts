@@ -1,5 +1,6 @@
 import { Router } from "express";
 import {
+  getAllUsersController,
   getUserAndProfileController,
   signInController,
   signupController,
@@ -32,6 +33,9 @@ userRouter.post("/signup", signupController);
 userRouter.post("/signin", signInController);
 userRouter.post("/update_user", authMiddleware, updateUserController)
 userRouter.get("/get_user_and_profile", authMiddleware, getUserAndProfileController )
-userRouter.post("/update_user_profile", authMiddleware, updateUserProfileController)
+userRouter.post("/update_user_profile", authMiddleware, updateUserProfileController);
+userRouter.get("/getAllUsers", getAllUsersController);
+
+
 
 export default userRouter;
