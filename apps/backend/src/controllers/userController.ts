@@ -21,11 +21,19 @@ const convertUserDataToPDF = async (userData: any): Promise<string> => {
   doc.fontSize(20).text("RESUME", { align: "center" });
   doc.moveDown(1.5);
 
-  // Add profile picture if exists - properly centered
+  // Add profile picture (user's photo or default) - properly centered
+  let imagePath = "uploads/default.jpg"; // Default image path
+
+  // Use user's profile picture if it exists, otherwise use default
   if (
     userData.profilePicture &&
     fs.existsSync(`uploads/${userData.profilePicture}`)
   ) {
+    imagePath = `uploads/${userData.profilePicture}`;
+  }
+
+  // Always display an image (either user's or default)
+  if (fs.existsSync(imagePath)) {
     // Calculate center position for image
     const pageWidth = doc.page.width;
     const imageWidth = 120;
@@ -33,7 +41,7 @@ const convertUserDataToPDF = async (userData: any): Promise<string> => {
     const imageX = (pageWidth - imageWidth) / 2;
     const imageY = doc.y;
 
-    doc.image(`uploads/${userData.profilePicture}`, imageX, imageY, {
+    doc.image(imagePath, imageX, imageY, {
       width: imageWidth,
       height: imageHeight,
       fit: [imageWidth, imageHeight],
@@ -42,6 +50,7 @@ const convertUserDataToPDF = async (userData: any): Promise<string> => {
     // Move Y position past the image
     doc.y = imageY + imageHeight + 20; // 20 points spacing after image
   } else {
+    // If even default image doesn't exist, just add spacing
     doc.moveDown(1);
   }
 
@@ -448,7 +457,6 @@ export const downloadProfileController = async (
 ) => {
   try {
     const userId = req.query.id;
-    
 
     if (!userId) {
       return res.status(400).json({
