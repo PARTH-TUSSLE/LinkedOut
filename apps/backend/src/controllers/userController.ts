@@ -542,3 +542,66 @@ export const downloadProfileController = async (
     });
   }
 };
+
+export const sendConnectionReqController = async ( req: Request, res: Response ) => {
+
+  try {
+    
+    const id = req.userId;
+    const {  receiverId } = req.body;
+
+    
+    
+    const user = await client.user.findFirst({
+      where: {
+        id: Number(id)
+      }
+    })
+
+     
+
+    if ( !user ) {
+      return res.json({
+        msg: "Not authorized!"
+    })
+    }
+
+    const isConnected = await client.connection.findFirst({
+      where: {
+        OR: [
+          { senderId: user.id, receiverId: receiverId },
+          { senderId: receiverId, receiverId: user.id },
+        ],
+      },
+    }); 
+
+    if ( isConnected ) {
+      
+      return res.json({
+        msg: "Connection req already sent!"
+      })
+
+    } else {
+
+      await client.connection.create({
+        data: {
+          senderId: user.id,
+          receiverId: receiverId,
+        },
+      });
+
+      return res.json({
+        msg: "Connection req sent successfully!"
+      })
+
+    }
+
+  } catch (error) {
+    
+    return res.status(500).json({
+      msg: "Some error o0ccurred!"
+    })
+
+  }
+
+}
