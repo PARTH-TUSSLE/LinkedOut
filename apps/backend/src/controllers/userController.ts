@@ -424,7 +424,7 @@ export const updateUserProfileController = async (
   }
 };
 
-// Function to get all profiles with user data (equivalent to your MongoDB populate example)
+
 export const getAllUsersController = async (req: Request, res: Response) => {
   try {
     const profiles = await client.profile.findMany({
@@ -547,30 +547,47 @@ export const sendConnectionReqController = async ( req: Request, res: Response )
 
   try {
     
-    const id = req.userId;
-    const {  receiverId } = req.body;
+    const id = Number(req.userId);
 
-    
-    
-    const user = await client.user.findFirst({
-      where: {
-        id: Number(id)
-      }
-    })
+     if (!id) {
+       return res.json({
+         msg: "Not authorized!",
+       });
+     }
 
-     
+    const receiverId = Number(req.body.receiverId); 
 
-    if ( !user ) {
+    if (!receiverId || isNaN(receiverId) || receiverId <= 0) {
+
       return res.json({
-        msg: "Not authorized!"
-    })
+        msg: "Invalid receiver ID",
+      });
+
     }
+
+    if (id === receiverId) {
+      return res.json({
+        msg: "Cannot send request to yourself",
+      });
+    }
+
+    const receiver = await client.user.findFirst({
+      where: {
+        id: receiverId,
+      },
+    });
+
+     if (!receiver) {
+       return res.json({
+         msg: "No user found",
+       });
+     }
 
     const isConnected = await client.connection.findFirst({
       where: {
         OR: [
-          { senderId: user.id, receiverId: receiverId },
-          { senderId: receiverId, receiverId: user.id },
+          { senderId: id, receiverId: receiverId },
+          { senderId: receiverId, receiverId: id },
         ],
       },
     }); 
@@ -585,7 +602,7 @@ export const sendConnectionReqController = async ( req: Request, res: Response )
 
       await client.connection.create({
         data: {
-          senderId: user.id,
+          senderId: id,
           receiverId: receiverId,
         },
       });
@@ -599,9 +616,16 @@ export const sendConnectionReqController = async ( req: Request, res: Response )
   } catch (error) {
     
     return res.status(500).json({
-      msg: "Some error o0ccurred!"
+      msg: "Some error occurred!"
     })
 
   }
 
 }
+
+// get my connection requests -> maine kis kis ko bheji h 
+
+// what are my connections -> mujhe kis kis ne bheja
+
+// accept connection
+
