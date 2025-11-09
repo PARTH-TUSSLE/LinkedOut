@@ -3,6 +3,7 @@ import {
   downloadProfileController,
   getAllUsersController,
   getUserAndProfileController,
+  myReceivedReqsController,
   mySentReqsController,
   sendConnectionReqController,
   signInController,
@@ -41,6 +42,7 @@ userRouter.get("/getAllUsers", getAllUsersController);
 userRouter.get("/user/downloadResume/", downloadProfileController)
 userRouter.post("/user/send_request_connection", authMiddleware, sendConnectionReqController);
 userRouter.get("/user/my_sent_reqs", authMiddleware, mySentReqsController);
+userRouter.get("/user/my_received_reqs", authMiddleware, myReceivedReqsController);
 
 
 export default userRouter;
