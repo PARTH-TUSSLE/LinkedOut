@@ -623,6 +623,46 @@ export const sendConnectionReqController = async ( req: Request, res: Response )
 
 }
 
+export const mySentReqsController = async ( req: Request, res: Response ) => {
+
+    const id = Number(req.userId);
+
+     if (!id || isNaN(id) ) {
+       return res.json({
+         msg: "Not authorized !",
+       });
+     }
+
+
+  try {
+    
+    const reqs = await client.connection.findMany({
+      where: {
+        senderId: id
+      }, include: {
+        receiver: {
+          select: {
+            id: true,
+            name: true,
+            username: true
+          }
+        }
+      }
+    })
+
+    return res.json({
+      reqs
+    })
+
+  } catch (error) {
+    return res.status(500).json({
+      msg: "Some error occured !"
+    })
+  }
+
+}
+
+
 // get my connection requests -> maine kis kis ko bheji h 
 
 // what are my connections -> mujhe kis kis ne bheja
