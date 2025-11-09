@@ -697,6 +697,63 @@ export const myReceivedReqsController = async (req: Request, res: Response) => {
   }
 };
 
+export const connectionReqStatusController = async ( req: Request, res: Response ) => {
+
+  const connectionId = Number(req.body.connectionId);
+
+  const { actionType } = req.body;
+
+
+  try {
+    
+    if ( actionType === "accept" ) {
+      
+      await client.connection.update({
+        where: {
+          connectionId: connectionId
+        }, data: {
+          status: "accepted"
+        }
+      })
+
+    } else if ( actionType === "reject" ) {
+
+      await client.connection.update({
+        where: {
+          connectionId: connectionId
+        }, data: {
+          status: "rejected"
+        }
+      })
+
+    } else {
+
+      await client.connection.update({
+        where: {
+          connectionId: connectionId,
+        },
+        data: {
+          status: "pending",
+        },
+      });
+
+    }
+
+    return res.json({
+      msg: "Status updated !"
+    })
+
+  } catch (error) {
+    
+    return res.status(500).json({
+      msg: "Some error occured !",
+      error
+    })
+
+  }
+
+}
+
 
 
 // accept connection
