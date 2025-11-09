@@ -424,7 +424,6 @@ export const updateUserProfileController = async (
   }
 };
 
-
 export const getAllUsersController = async (req: Request, res: Response) => {
   try {
     const profiles = await client.profile.findMany({
@@ -543,26 +542,25 @@ export const downloadProfileController = async (
   }
 };
 
-export const sendConnectionReqController = async ( req: Request, res: Response ) => {
-
+export const sendConnectionReqController = async (
+  req: Request,
+  res: Response
+) => {
   try {
-    
     const id = Number(req.userId);
 
-     if (!id) {
-       return res.json({
-         msg: "Not authorized!",
-       });
-     }
+    if (!id) {
+      return res.json({
+        msg: "Not authorized!",
+      });
+    }
 
-    const receiverId = Number(req.body.receiverId); 
+    const receiverId = Number(req.body.receiverId);
 
     if (!receiverId || isNaN(receiverId) || receiverId <= 0) {
-
       return res.json({
         msg: "Invalid receiver ID",
       });
-
     }
 
     if (id === receiverId) {
@@ -577,11 +575,11 @@ export const sendConnectionReqController = async ( req: Request, res: Response )
       },
     });
 
-     if (!receiver) {
-       return res.json({
-         msg: "No user found",
-       });
-     }
+    if (!receiver) {
+      return res.json({
+        msg: "No user found",
+      });
+    }
 
     const isConnected = await client.connection.findFirst({
       where: {
@@ -590,16 +588,13 @@ export const sendConnectionReqController = async ( req: Request, res: Response )
           { senderId: receiverId, receiverId: id },
         ],
       },
-    }); 
+    });
 
-    if ( isConnected ) {
-      
+    if (isConnected) {
       return res.json({
-        msg: "Connection req already sent!"
-      })
-
+        msg: "Connection req already sent!",
+      });
     } else {
-
       await client.connection.create({
         data: {
           senderId: id,
@@ -608,59 +603,50 @@ export const sendConnectionReqController = async ( req: Request, res: Response )
       });
 
       return res.json({
-        msg: "Connection req sent successfully!"
-      })
-
+        msg: "Connection req sent successfully!",
+      });
     }
-
   } catch (error) {
-    
     return res.status(500).json({
-      msg: "Some error occurred!"
-    })
+      msg: "Some error occurred!",
+    });
+  }
+};
 
+export const mySentReqsController = async (req: Request, res: Response) => {
+  const id = Number(req.userId);
+
+  if (!id || isNaN(id)) {
+    return res.json({
+      msg: "Not authorized !",
+    });
   }
 
-}
-
-export const mySentReqsController = async ( req: Request, res: Response ) => {
-
-    const id = Number(req.userId);
-
-     if (!id || isNaN(id) ) {
-       return res.json({
-         msg: "Not authorized !",
-       });
-     }
-
-
   try {
-    
     const reqs = await client.connection.findMany({
       where: {
-        senderId: id
-      }, include: {
+        senderId: id,
+      },
+      include: {
         receiver: {
           select: {
             id: true,
             name: true,
-            username: true
-          }
-        }
-      }
-    })
+            username: true,
+          },
+        },
+      },
+    });
 
     return res.json({
-      reqs
-    })
-
+      reqs,
+    });
   } catch (error) {
     return res.status(500).json({
-      msg: "Some error occured !"
-    })
+      msg: "Some error occured !",
+    });
   }
-
-}
+};
 
 export const myReceivedReqsController = async (req: Request, res: Response) => {
   const id = Number(req.userId);
@@ -697,64 +683,69 @@ export const myReceivedReqsController = async (req: Request, res: Response) => {
   }
 };
 
-export const connectionReqStatusController = async ( req: Request, res: Response ) => {
-
+export const connectionReqStatusController = async (
+  req: Request,
+  res: Response
+) => {
   const connectionId = Number(req.body.connectionId);
-
   const { actionType } = req.body;
+  const id = Number(req.userId);
 
+  if (!id || isNaN(id)) {
+    return res.json({
+      msg: "Not authorized !",
+    });
+  }
+
+  if (!connectionId || isNaN(connectionId)) {
+    return res.json({
+      msg: "Invalid connectionId",
+    });
+  }
 
   try {
-    
-    if ( actionType === "accept" ) {
-      
-      await client.connection.update({
-        where: {
-          connectionId: connectionId
-        }, data: {
-          status: "accepted"
-        }
-      })
+    const connectionReq = await client.connection.findFirst({
+      where: {
+        connectionId: connectionId,
+        receiverId: id,
+      },
+    });
 
-    } else if ( actionType === "reject" ) {
+    if (!connectionReq) {
+      return res.json({
+        msg: "Connection req not found !",
+      });
+    }
 
-      await client.connection.update({
-        where: {
-          connectionId: connectionId
-        }, data: {
-          status: "rejected"
-        }
-      })
-
-    } else {
-
+    if (actionType === "accept") {
       await client.connection.update({
         where: {
           connectionId: connectionId,
         },
         data: {
-          status: "pending",
+          status: "accepted",
         },
       });
-
+    } else if (actionType === "reject") {
+      await client.connection.update({
+        where: {
+          connectionId: connectionId,
+        },
+        data: {
+          status: "rejected",
+        },
+      });
     }
 
     return res.json({
-      msg: "Status updated !"
-    })
-
+      msg: "Status updated !",
+    });
   } catch (error) {
-    
     return res.status(500).json({
       msg: "Some error occured !",
-      error
-    })
-
+      error,
+    });
   }
+};
 
-}
-
-
-
-// accept connection
 

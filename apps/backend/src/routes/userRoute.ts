@@ -46,6 +46,7 @@ userRouter.get("/user/my_sent_reqs", authMiddleware, mySentReqsController);
 userRouter.get("/user/my_received_reqs", authMiddleware, myReceivedReqsController);
 userRouter.post(
   "/user/connection_Req_Status",
+  authMiddleware,
   connectionReqStatusController);
 
 
