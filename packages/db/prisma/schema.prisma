@@ -23,7 +23,7 @@ model User {
   
   // Relations
   profile             Profile?    // One-to-one: each user can have one profile
-  posts               POST[]
+  posts               Post[]
   sentConnections     Connection[]  @relation("sentConnections")
   receivedConnections Connection[]  @relation("receivedConnections")
   comments            Comment[]
@@ -73,7 +73,7 @@ model WorkHistory {
   description String?   @default("")
 }
 
-model POST {
+model Post {
  postId         Int         @id @default(autoincrement())
  creatorId      Int         
  creator        User        @relation(fields: [creatorId], references: [id])
@@ -109,5 +109,5 @@ model Comment {
   creatorId         Int
   creator           User    @relation(fields: [creatorId], references: [id])
   postId            Int
-  post              POST    @relation(fields: [postId], references: [postId])
+  post              Post    @relation(fields: [postId], references: [postId])
 }
