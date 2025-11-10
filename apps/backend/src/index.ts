@@ -1,16 +1,18 @@
 import express from "express";
-import cors from "cors"
+import cors from "cors";
 import "dotenv/config";
-import userRouter from "./routes/userRoute.js";
+import userRouter from "./routes/userRoutes.js";
+import { postRouter } from "./routes/postRoutes.js";
 
 const app = express();
-const PORT = process.env.PORT || 8080
+const PORT = process.env.PORT || 8080;
 
-app.use(cors())
+app.use(cors());
 app.use(express.json());
-app.use("/api/v1", userRouter)
-app.use(express.static("uploads"))
+app.use("/api/v1", userRouter);
+app.use("/api/v1", postRouter);
+app.use(express.static("uploads"));
 
 app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`)
-})
+  console.log(`Server running on port ${PORT}`);
+});
