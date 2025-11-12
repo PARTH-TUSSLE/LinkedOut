@@ -225,7 +225,7 @@ export const signInController = async (req: Request, res: Response) => {
       const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET!);
       res.status(200).json({
         msg: "User signed in successfully!",
-        token,
+        token: token
       });
     }
   } catch (error) {
