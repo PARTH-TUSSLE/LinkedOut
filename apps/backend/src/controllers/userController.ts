@@ -1,3 +1,38 @@
+// Get a specific user's profile by userId
+export const getProfileByUserIdController = async (
+  req: Request,
+  res: Response
+) => {
+  try {
+    const userId = Number(req.params.userId);
+    if (!userId || isNaN(userId)) {
+      return res.status(400).json({ msg: "Invalid userId" });
+    }
+
+    const user = await client.user.findFirst({
+      where: { id: userId },
+    });
+    if (!user) {
+      return res.status(404).json({ msg: "User not found" });
+    }
+
+    let profile = await client.profile.findFirst({
+      where: { userId },
+      include: { education: true, workHistory: true },
+    });
+    // Create profile if it doesn't exist
+    if (!profile) {
+      profile = await client.profile.create({
+        data: { userId },
+        include: { education: true, workHistory: true },
+      });
+    }
+
+    return res.json({ user, profile });
+  } catch (error) {
+    return res.status(500).json({ msg: "Some unexpected error occurred!" });
+  }
+};
 import { Request, Response } from "express";
 import jwt from "jsonwebtoken";
 import { client } from "@repo/db/client";
@@ -176,14 +211,31 @@ export const signupController = async (req: Request, res: Response) => {
       },
     });
 
+    const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET!);
+
     res.status(201).json({
       msg: "User created successfully !",
-      user,
-      profile,
+      token: token,
+      user: {
+        id: user.id,
+        name: user.name,
+        username: user.username,
+        email: user.email,
+        profilePicture: user.profilePicture,
+      },
     });
-  } catch (error) {
-    res.status(409).json({
-      msg: "username or email already taken",
+  } catch (error: any) {
+    // Check if it's a Prisma unique constraint error
+    if (error.code === "P2002") {
+      return res.status(409).json({
+        msg: "username or email already taken",
+      });
+    }
+
+    // For any other error, return a generic error message
+    console.error("Signup error:", error);
+    return res.status(500).json({
+      msg: "An error occurred during signup",
     });
   }
 };
@@ -225,7 +277,14 @@ export const signInController = async (req: Request, res: Response) => {
       const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET!);
       res.status(200).json({
         msg: "User signed in successfully!",
-        token: token
+        token: token,
+        user: {
+          id: user.id,
+          name: user.name,
+          username: user.username,
+          email: user.email,
+          profilePicture: user.profilePicture,
+        },
       });
     }
   } catch (error) {
@@ -347,11 +406,28 @@ export const getUserAndProfileController = async (
       return;
     }
 
-    const profile = await client.profile.findFirst({
+    let profile = await client.profile.findFirst({
       where: {
         userId: Number(userId),
       },
+      include: {
+        education: true,
+        workHistory: true,
+      },
     });
+
+    // Create profile if it doesn't exist
+    if (!profile) {
+      profile = await client.profile.create({
+        data: {
+          userId: Number(userId),
+        },
+        include: {
+          education: true,
+          workHistory: true,
+        },
+      });
+    }
 
     res.json({
       user,
@@ -380,35 +456,52 @@ export const updateUserProfileController = async (
       return;
     }
 
-    const profileToUpdate = await client.profile.findFirst({
+    // First, delete existing education and work history
+    await client.education.deleteMany({
       where: {
-        userId: Number(userId),
+        profile: {
+          userId: Number(userId),
+        },
       },
     });
 
-    if (!profileToUpdate) {
-      res.json({
-        msg: "No profile found!",
-      });
-      return;
-    }
+    await client.workHistory.deleteMany({
+      where: {
+        profile: {
+          userId: Number(userId),
+        },
+      },
+    });
 
-    const updatedProfile = await client.profile.update({
+    // Use upsert to create or update profile
+    const updatedProfile = await client.profile.upsert({
       where: { userId: Number(userId) },
-      data: {
+      create: {
+        userId: Number(userId),
         bio: bio,
         occupationStatus: occupationStatus,
         location: location,
-
         education: {
-          deleteMany: {},
           create: education,
         },
-
         workHistory: {
-          deleteMany: {},
           create: workHistory,
         },
+      },
+      update: {
+        bio: bio,
+        occupationStatus: occupationStatus,
+        location: location,
+        education: {
+          create: education,
+        },
+        workHistory: {
+          create: workHistory,
+        },
+      },
+      include: {
+        education: true,
+        workHistory: true,
       },
     });
 
@@ -747,5 +840,3 @@ export const connectionReqStatusController = async (
     });
   }
 };
-
-
