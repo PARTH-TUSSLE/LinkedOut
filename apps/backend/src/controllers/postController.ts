@@ -190,6 +190,16 @@ export const getAllCommentsOnPostController = async (
       where: {
         postId: postId,
       },
+      include: {
+        creator: {
+          select: {
+            id: true,
+            name: true,
+            username: true,
+            profilePicture: true,
+          },
+        },
+      },
     });
 
     if (comments.length === 0) {
