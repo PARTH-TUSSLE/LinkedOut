@@ -63,7 +63,28 @@ export const updateProfile = createAsyncThunk(
     { rejectWithValue }
   ) => {
     try {
-      const response = await api.post("/update_user_profile", data);
+      const body = {
+        bio: data.bio,
+        occupationStatus: data.occupationStatus,
+        location: data.location,
+        education: data.education.map((e) => ({
+          school: e.school || "",
+          degree: e.degree || "",
+          fieldOfStudy: e.fieldOfStudy || "",
+          startDate: e.startYear ? new Date(e.startYear, 0, 1).toISOString() : null,
+          endDate: e.endYear ? new Date(e.endYear, 0, 1).toISOString() : null,
+        })),
+        workHistory: data.workHistory.map((w) => ({
+          company: w.company || "",
+          location: w.location || "",
+          position: w.position || "",
+          years: w.years || "",
+          startDate: w.startDate ? new Date(w.startDate).toISOString() : null,
+          endDate: w.endDate ? new Date(w.endDate).toISOString() : null,
+          description: w.description || "",
+        })),
+      };
+      const response = await api.post("/update_user_profile", body);
       return response.data.updatedProfile as Profile;
     } catch (error: any) {
       return rejectWithValue(

@@ -111,27 +111,7 @@ export function ProfileEditForm({ profile, onSuccess }: ProfileEditFormProps) {
   const onSubmit = async (data: ProfileEditFormData) => {
     try {
       await dispatch(
-        updateProfile({
-          bio: data.bio || "",
-          occupationStatus: data.occupationStatus || "",
-          location: data.location || "",
-          education: data.education.map((e) => ({
-            school: e.school || "",
-            degree: e.degree || "",
-            fieldOfStudy: e.fieldOfStudy || "",
-            startYear: e.startYear || null,
-            endYear: e.endYear || null,
-          })),
-          workHistory: data.workHistory.map((w) => ({
-            company: w.company || "",
-            location: w.location || "",
-            position: w.position || "",
-            years: w.years || "",
-            startDate: w.startDate ? new Date(w.startDate).toISOString() : null,
-            endDate: w.endDate ? new Date(w.endDate).toISOString() : null,
-            description: w.description || "",
-          })),
-        })
+        updateProfile(data)
       ).unwrap();
 
       dispatch(addToast({ message: "Profile updated", type: "success" }));
