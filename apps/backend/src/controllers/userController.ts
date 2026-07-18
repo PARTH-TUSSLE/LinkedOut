@@ -776,6 +776,65 @@ export const myReceivedReqsController = async (req: Request, res: Response) => {
   }
 };
 
+export const myConnectionsController = async (req: Request, res: Response) => {
+  const id = Number(req.userId);
+
+  if (!id || isNaN(id)) {
+    return res.json({
+      msg: "Not authorized !",
+    });
+  }
+
+  try {
+    const connections = await client.connection.findMany({
+      where: {
+        status: "accepted",
+        OR: [
+          { senderId: id },
+          { receiverId: id },
+        ],
+      },
+      include: {
+        sender: {
+          select: {
+            id: true,
+            name: true,
+            username: true,
+            email: true,
+            profilePicture: true,
+          },
+        },
+        receiver: {
+          select: {
+            id: true,
+            name: true,
+            username: true,
+            email: true,
+            profilePicture: true,
+          },
+        },
+      },
+    });
+
+    const connectedUsers = connections.map((conn) => {
+      const otherUser = conn.senderId === id ? conn.receiver : conn.sender;
+      return {
+        connectionId: conn.connectionId,
+        connectedAt: conn.status,
+        user: otherUser,
+      };
+    });
+
+    return res.json({
+      connections: connectedUsers,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      msg: "Some error occured !",
+    });
+  }
+};
+
 export const connectionReqStatusController = async (
   req: Request,
   res: Response

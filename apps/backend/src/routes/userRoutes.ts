@@ -5,6 +5,7 @@ import {
   getAllUsersController,
   getUserAndProfileController,
   getProfileByUserIdController,
+  myConnectionsController,
   myReceivedReqsController,
   mySentReqsController,
   sendConnectionReqController,
@@ -68,6 +69,11 @@ userRouter.post(
   "/user/connection_Req_Status",
   authMiddleware,
   connectionReqStatusController
+);
+userRouter.get(
+  "/user/connections",
+  authMiddleware,
+  myConnectionsController
 );
 
 export default userRouter;
