@@ -1,7 +1,7 @@
 import { Router } from "express";
 import multer from "multer";
 import { authMiddleware } from "../middlewares/authMiddleware.js";
-import { addCommentController, createPostController, deleteCommentController, deletePostController, getAllCommentsOnPostController, getAllPostsController, increasePostLikeController } from "../controllers/postController.js";
+import { addCommentController, createPostController, decreasePostLikeController, deleteCommentController, deletePostController, getAllCommentsOnPostController, getAllPostsController, increasePostLikeController } from "../controllers/postController.js";
 
 export const postRouter: Router = Router();
 
@@ -18,4 +18,5 @@ postRouter.delete("/delete/post", authMiddleware, deletePostController);
 postRouter.post("/create/comment", authMiddleware, addCommentController);
 postRouter.get("/posts/:postId/comments", getAllCommentsOnPostController);
 postRouter.delete("/delete/comment", authMiddleware, deleteCommentController);
-postRouter.post("/increaseLikes", authMiddleware, increasePostLikeController)
+postRouter.post("/increaseLikes", authMiddleware, increasePostLikeController);
+postRouter.post("/decreaseLikes", authMiddleware, decreasePostLikeController);

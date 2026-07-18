@@ -322,3 +322,62 @@ export const increasePostLikeController = async (
     });
   }
 };
+
+export const decreasePostLikeController = async (
+  req: Request,
+  res: Response
+) => {
+  const id = Number(req.userId);
+  const postId = Number(req.body.postId);
+
+  if (!id || isNaN(id)) {
+    return res.json({
+      msg: "Invalid userId",
+    });
+  }
+
+  if (!postId || isNaN(postId)) {
+    return res.json({
+      msg: "Invalid postId",
+    });
+  }
+
+  try {
+    const post = await client.post.findFirst({
+      where: {
+        postId: postId,
+      },
+    });
+
+    if (!post) {
+      return res.json({
+        msg: "Post not found!",
+      });
+    }
+
+    if (post.likes <= 0) {
+      return res.json({
+        msg: "Cannot decrement below 0",
+      });
+    }
+
+    await client.post.update({
+      where: {
+        postId: postId,
+      },
+      data: {
+        likes: {
+          decrement: 1,
+        },
+      },
+    });
+
+    return res.json({
+      msg: "Decreased like count by 1",
+    });
+  } catch (error) {
+    return res.status(500).json({
+      msg: "Some error occured!",
+    });
+  }
+};
