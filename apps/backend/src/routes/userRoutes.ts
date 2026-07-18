@@ -53,7 +53,7 @@ userRouter.post(
   authMiddleware,
   updateUserProfileController
 );
-userRouter.get("/getAllUsers", getAllUsersController);
+userRouter.get("/getAllUsers", authMiddleware, getAllUsersController);
 userRouter.get("/user/downloadResume/", downloadProfileController);
 userRouter.post(
   "/user/send_request_connection",
