@@ -79,6 +79,15 @@ const postsSlice = createSlice({
         );
       }
     },
+    updatePostCommentCount(
+      state,
+      action: PayloadAction<{ postId: number; delta: number }>
+    ) {
+      const post = state.posts.find((p) => p.postId === action.payload.postId);
+      if (post) {
+        post.commentCount = (post.commentCount ?? 0) + action.payload.delta;
+      }
+    },
   },
 });
 
@@ -92,5 +101,6 @@ export const {
   setComments,
   addComment,
   removeComment,
+  updatePostCommentCount,
 } = postsSlice.actions;
 export default postsSlice.reducer;

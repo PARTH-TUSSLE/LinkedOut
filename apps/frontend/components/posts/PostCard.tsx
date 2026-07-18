@@ -101,7 +101,9 @@ export function PostCard({ post }: PostCardProps) {
           className={showComments ? "text-primary" : ""}
         >
           <MessageCircle size={16} />
-          Comments
+          {post.commentCount != null && post.commentCount > 0
+            ? `${post.commentCount} Comment${post.commentCount !== 1 ? "s" : ""}`
+            : "Comments"}
         </Button>
       </div>
 

@@ -44,7 +44,7 @@ const handleMulterError = (err: any, req: Request, res: Response, next: NextFunc
 };
 
 postRouter.post("/create/post", upload.single("media"), handleMulterError, authMiddleware, createPostController);
-postRouter.get("/posts", getAllPostsController);
+postRouter.get("/posts", authMiddleware, getAllPostsController);
 postRouter.delete("/delete/post", authMiddleware, deletePostController);
 postRouter.post("/create/comment", authMiddleware, addCommentController);
 postRouter.get("/posts/:postId/comments", getAllCommentsOnPostController);

@@ -4,7 +4,7 @@ import { Trash2 } from "lucide-react";
 import { Avatar } from "@/components/ui/Avatar";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { deleteComment } from "@/store/thunks/postsThunks";
-import { removeComment } from "@/store/slices/postsSlice";
+import { removeComment, updatePostCommentCount } from "@/store/slices/postsSlice";
 import { addToast } from "@/store/slices/uiSlice";
 import type { Comment } from "@/types";
 
@@ -24,6 +24,7 @@ export function CommentItem({ comment, postId }: CommentItemProps) {
         deleteComment({ postId, commentId: comment.commentId })
       ).unwrap();
       dispatch(removeComment({ postId, commentId: comment.commentId }));
+      dispatch(updatePostCommentCount({ postId, delta: -1 }));
     } catch {
       dispatch(addToast({ message: "Failed to delete comment", type: "error" }));
     }

@@ -27,6 +27,16 @@ export const createPostController = async (req: Request, res: Response) => {
         media: req.file != undefined ? req.file.filename : "",
         fileType: req.file != undefined ? req.file?.mimetype.split("/")[1] : "",
       },
+      include: {
+        creator: {
+          select: {
+            id: true,
+            name: true,
+            username: true,
+            profilePicture: true,
+          },
+        },
+      },
     });
 
     return res.json({
@@ -42,6 +52,7 @@ export const createPostController = async (req: Request, res: Response) => {
 
 export const getAllPostsController = async (req: Request, res: Response) => {
   try {
+    const userId = Number(req.userId);
     const page = Math.max(1, parseInt(req.query.page as string) || 1);
     const limit = Math.min(50, Math.max(1, parseInt(req.query.limit as string) || 10));
     const skip = (page - 1) * limit;
@@ -62,13 +73,29 @@ export const getAllPostsController = async (req: Request, res: Response) => {
               profilePicture: true,
             },
           },
+          _count: {
+            select: { comments: true },
+          },
         },
       }),
       client.post.count(),
     ]);
 
+    const postIds = posts.map((p) => p.postId);
+    const userLikes = await client.like.findMany({
+      where: { userId, postId: { in: postIds } },
+      select: { postId: true },
+    });
+    const likedPostIds = new Set(userLikes.map((l) => l.postId));
+
+    const postsWithLiked = posts.map(({ _count, ...post }) => ({
+      ...post,
+      commentCount: _count.comments,
+      likedByUser: likedPostIds.has(post.postId),
+    }));
+
     return res.json({
-      posts,
+      posts: postsWithLiked,
       pagination: {
         page,
         limit,
@@ -184,6 +211,16 @@ export const addCommentController = async (req: Request, res: Response) => {
         creatorId: id,
         postId: postId,
         body: commentBody,
+      },
+      include: {
+        creator: {
+          select: {
+            id: true,
+            name: true,
+            username: true,
+            profilePicture: true,
+          },
+        },
       },
     });
 

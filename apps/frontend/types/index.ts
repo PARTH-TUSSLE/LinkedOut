@@ -59,6 +59,7 @@ export interface Post {
     profilePicture: string;
   };
   likedByUser?: boolean;
+  commentCount?: number;
 }
 
 export interface Comment {
@@ -72,6 +73,12 @@ export interface Comment {
     username: string;
     profilePicture: string;
   };
+}
+
+export interface ConnectedUser {
+  connectionId: number;
+  connectedAt: string;
+  user: User;
 }
 
 export interface Connection {

@@ -11,7 +11,11 @@ import {
   fetchComments,
   addComment as addCommentThunk,
 } from "@/store/thunks/postsThunks";
-import { setComments, addComment } from "@/store/slices/postsSlice";
+import {
+  setComments,
+  addComment,
+  updatePostCommentCount,
+} from "@/store/slices/postsSlice";
 import { addToast } from "@/store/slices/uiSlice";
 import type { Comment } from "@/types";
 
@@ -52,6 +56,7 @@ export function CommentSection({ postId }: CommentSectionProps) {
         addCommentThunk({ postId, commentBody: body.trim() })
       ).unwrap();
       dispatch(addComment({ postId, comment: result.comment }));
+      dispatch(updatePostCommentCount({ postId, delta: 1 }));
       setBody("");
     } catch {
       dispatch(addToast({ message: "Failed to add comment", type: "error" }));
@@ -100,14 +105,19 @@ export function CommentSection({ postId }: CommentSectionProps) {
           ))}
         </div>
       ) : comments && comments.length > 0 ? (
-        <div className="space-y-3">
-          {comments.map((comment) => (
-            <CommentItem
-              key={comment.commentId}
-              comment={comment}
-              postId={postId}
-            />
-          ))}
+        <div>
+          <p className="mb-2 text-xs font-medium text-text-secondary">
+            {comments.length} {comments.length === 1 ? "Comment" : "Comments"}
+          </p>
+          <div className="space-y-3">
+            {comments.map((comment) => (
+              <CommentItem
+                key={comment.commentId}
+                comment={comment}
+                postId={postId}
+              />
+            ))}
+          </div>
         </div>
       ) : (
         <EmptyState
