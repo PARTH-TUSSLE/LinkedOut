@@ -13,6 +13,7 @@ import {
   signInController,
   signupController,
   updateUserController,
+  removeProfilePictureController,
   updateUserProfileController,
   uploadProfilePicture,
   verifyTokenController,
@@ -65,6 +66,12 @@ userRouter.post(
   handleMulterError,
   authMiddleware,
   uploadProfilePicture
+);
+
+userRouter.post(
+  "/remove_profile_picture",
+  authMiddleware,
+  removeProfilePictureController
 );
 
 userRouter.post("/signup", signupController);

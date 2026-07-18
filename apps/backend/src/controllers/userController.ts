@@ -771,7 +771,7 @@ export const mySentReqsController = async (req: Request, res: Response) => {
     const limit = Math.min(50, Math.max(1, parseInt(req.query.limit as string) || 10));
     const skip = (page - 1) * limit;
 
-    const where = { senderId: id };
+    const where = { senderId: id, status: "pending" };
 
     const [reqs, total] = await Promise.all([
       client.connection.findMany({
@@ -821,7 +821,7 @@ export const myReceivedReqsController = async (req: Request, res: Response) => {
     const limit = Math.min(50, Math.max(1, parseInt(req.query.limit as string) || 10));
     const skip = (page - 1) * limit;
 
-    const where = { receiverId: id };
+    const where = { receiverId: id, status: "pending" };
 
     const [reqs, total] = await Promise.all([
       client.connection.findMany({
@@ -1081,5 +1081,52 @@ export const verifyTokenController = async (req: Request, res: Response) => {
     return res.status(500).json({
       msg: "Some error occured!",
     });
+  }
+};
+
+export const removeProfilePictureController = async (
+  req: Request,
+  res: Response
+) => {
+  try {
+    const userId = Number(req.userId);
+
+    if (!userId || isNaN(userId)) {
+      return res.status(401).json({ msg: "Not authorized!" });
+    }
+
+    const currentUser = await client.user.findFirst({
+      where: { id: userId },
+    });
+
+    if (!currentUser) {
+      return res.status(404).json({ msg: "User not found!" });
+    }
+
+    if (
+      currentUser.profilePicture &&
+      currentUser.profilePicture !== "default.jpeg"
+    ) {
+      const oldPath = path.join(
+        process.cwd(),
+        "uploads",
+        currentUser.profilePicture
+      );
+      fs.unlink(oldPath, (err) => {
+        if (err && err.code !== "ENOENT") {
+          console.error("Failed to delete profile picture:", err);
+        }
+      });
+    }
+
+    const updated = await client.user.update({
+      where: { id: userId },
+      data: { profilePicture: "default.jpeg" },
+    });
+
+    return res.status(200).json({ msg: "Profile picture removed", user: updated });
+  } catch (err: any) {
+    console.error("removeProfilePicture error:", err);
+    return res.status(500).json({ msg: "Some error occurred" });
   }
 };

@@ -1,10 +1,11 @@
 import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
-import type { Connection, Profile } from "@/types";
+import type { Connection, ConnectedUser, Profile } from "@/types";
 
 export interface ConnectionsState {
   allUsers: Profile[];
   sentRequests: Connection[];
   receivedRequests: Connection[];
+  connections: ConnectedUser[];
   isLoading: boolean;
 }
 
@@ -12,6 +13,7 @@ const initialState: ConnectionsState = {
   allUsers: [],
   sentRequests: [],
   receivedRequests: [],
+  connections: [],
   isLoading: false,
 };
 
@@ -27,6 +29,9 @@ const connectionsSlice = createSlice({
     },
     setReceivedRequests(state, action: PayloadAction<Connection[]>) {
       state.receivedRequests = action.payload;
+    },
+    setConnections(state, action: PayloadAction<ConnectedUser[]>) {
+      state.connections = action.payload;
     },
     removeSentRequest(state, action: PayloadAction<number>) {
       state.sentRequests = state.sentRequests.filter(
@@ -48,6 +53,7 @@ export const {
   setAllUsers,
   setSentRequests,
   setReceivedRequests,
+  setConnections,
   removeSentRequest,
   removeReceivedRequest,
   setConnectionsLoading,

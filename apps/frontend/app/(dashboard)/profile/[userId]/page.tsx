@@ -6,6 +6,16 @@ import { ArrowLeft, Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useAppDispatch } from "@/store/hooks";
 import { fetchUserProfile as fetchUserProfileThunk } from "@/store/thunks/profileThunks";
+import {
+  fetchSentRequests,
+  fetchReceivedRequests,
+  fetchConnections,
+} from "@/store/thunks/connectionsThunks";
+import {
+  setSentRequests,
+  setReceivedRequests,
+  setConnections,
+} from "@/store/slices/connectionsSlice";
 import { ProfileHeader } from "@/components/profile/ProfileHeader";
 import { ProfileBio } from "@/components/profile/ProfileBio";
 import { ProfileEducation } from "@/components/profile/ProfileEducation";
@@ -36,10 +46,20 @@ export default function UserProfilePage() {
     }
 
     setLoading(true);
-    dispatch(fetchUserProfileThunk(userId))
-      .unwrap()
-      .then((result) => {
-        setData({ user: result.user, profile: result.profile });
+    Promise.all([
+      dispatch(fetchUserProfileThunk(userId)).unwrap(),
+      dispatch(fetchSentRequests()).unwrap(),
+      dispatch(fetchReceivedRequests()).unwrap(),
+      dispatch(fetchConnections()).unwrap(),
+    ])
+      .then(([profileData, sent, received, conns]) => {
+        setData({
+          user: profileData.user,
+          profile: profileData.profile,
+        });
+        dispatch(setSentRequests(sent));
+        dispatch(setReceivedRequests(received));
+        dispatch(setConnections(conns));
       })
       .catch((err: any) => {
         setError(typeof err === "string" ? err : "User not found");

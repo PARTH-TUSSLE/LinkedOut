@@ -7,8 +7,14 @@ import { useAppDispatch } from "@/store/hooks";
 import {
   acceptConnectionRequest,
   rejectConnectionRequest,
+  fetchConnections,
+  fetchReceivedRequests,
 } from "@/store/thunks/connectionsThunks";
-import { removeReceivedRequest } from "@/store/slices/connectionsSlice";
+import {
+  removeReceivedRequest,
+  setConnections,
+  setReceivedRequests,
+} from "@/store/slices/connectionsSlice";
 import { addToast } from "@/store/slices/uiSlice";
 
 interface AcceptRejectButtonsProps {
@@ -32,6 +38,12 @@ export function AcceptRejectButtons({
         dispatch(addToast({ message: "Request rejected", type: "info" }));
       }
       dispatch(removeReceivedRequest(connectionId));
+      const [conns, received] = await Promise.all([
+        dispatch(fetchConnections()).unwrap(),
+        dispatch(fetchReceivedRequests()).unwrap(),
+      ]);
+      dispatch(setConnections(conns));
+      dispatch(setReceivedRequests(received));
     } catch (err: any) {
       dispatch(
         addToast({

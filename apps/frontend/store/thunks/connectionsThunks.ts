@@ -1,12 +1,12 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import { api } from "@/config/axios";
-import type { Connection, Profile } from "@/types";
+import type { Connection, ConnectedUser, Profile } from "@/types";
 
 export const fetchAllUsers = createAsyncThunk(
   "connections/fetchAllUsers",
   async (_, { rejectWithValue }) => {
     try {
-      const response = await api.get("/getAllUsers");
+      const response = await api.get("/getAllUsers?limit=50");
       const profiles = response.data.profiles || [];
       return profiles as Profile[];
     } catch (error: any) {
@@ -92,6 +92,20 @@ export const rejectConnectionRequest = createAsyncThunk(
     } catch (error: any) {
       return rejectWithValue(
         error.response?.data?.msg || "Failed to reject request"
+      );
+    }
+  }
+);
+
+export const fetchConnections = createAsyncThunk(
+  "connections/fetchConnections",
+  async (_, { rejectWithValue }) => {
+    try {
+      const response = await api.get("/user/connections?limit=50");
+      return (response.data.connections || []) as ConnectedUser[];
+    } catch (error: any) {
+      return rejectWithValue(
+        error.response?.data?.msg || "Failed to fetch connections"
       );
     }
   }

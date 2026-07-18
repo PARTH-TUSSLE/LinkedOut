@@ -3,8 +3,19 @@
 import { useEffect } from "react";
 import { Users } from "lucide-react";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
-import { fetchAllUsers } from "@/store/thunks/connectionsThunks";
-import { setAllUsers, setConnectionsLoading } from "@/store/slices/connectionsSlice";
+import {
+  fetchAllUsers,
+  fetchSentRequests,
+  fetchReceivedRequests,
+  fetchConnections,
+} from "@/store/thunks/connectionsThunks";
+import {
+  setAllUsers,
+  setSentRequests,
+  setReceivedRequests,
+  setConnections,
+  setConnectionsLoading,
+} from "@/store/slices/connectionsSlice";
 import { Avatar } from "@/components/ui/Avatar";
 import { Card } from "@/components/ui/Card";
 import { ConnectButton } from "@/components/connections/ConnectButton";
@@ -22,9 +33,18 @@ export default function NetworkPage() {
 
   const loadUsers = () => {
     dispatch(setConnectionsLoading(true));
-    dispatch(fetchAllUsers())
-      .unwrap()
-      .then((result) => dispatch(setAllUsers(result)))
+    Promise.all([
+      dispatch(fetchAllUsers()).unwrap(),
+      dispatch(fetchSentRequests()).unwrap(),
+      dispatch(fetchReceivedRequests()).unwrap(),
+      dispatch(fetchConnections()).unwrap(),
+    ])
+      .then(([users, sent, received, conns]) => {
+        dispatch(setAllUsers(users));
+        dispatch(setSentRequests(sent));
+        dispatch(setReceivedRequests(received));
+        dispatch(setConnections(conns));
+      })
       .catch(() => {})
       .finally(() => dispatch(setConnectionsLoading(false)));
   };

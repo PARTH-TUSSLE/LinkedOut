@@ -111,6 +111,20 @@ export const updateUserInfo = createAsyncThunk(
   }
 );
 
+export const removeProfilePicture = createAsyncThunk(
+  "profile/removePicture",
+  async (_, { rejectWithValue }) => {
+    try {
+      const response = await api.post("/remove_profile_picture");
+      return response.data.user as User;
+    } catch (error: any) {
+      return rejectWithValue(
+        error.response?.data?.msg || "Failed to remove picture"
+      );
+    }
+  }
+);
+
 export const uploadProfilePicture = createAsyncThunk(
   "profile/uploadPicture",
   async (file: File, { rejectWithValue }) => {
