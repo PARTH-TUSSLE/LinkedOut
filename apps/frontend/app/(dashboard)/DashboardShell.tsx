@@ -1,10 +1,10 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { useAppSelector, useAppDispatch } from "@/store/hooks";
 import { checkAuth } from "@/store/thunks/authThunks";
-import { setCredentials } from "@/store/slices/authSlice";
+import { setCredentials, logout } from "@/store/slices/authSlice";
 import { STORAGE_KEYS } from "@/config/constants";
 import { Navbar } from "@/components/layout/Navbar";
 import { Sidebar } from "@/components/layout/Sidebar";
@@ -15,8 +15,12 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const dispatch = useAppDispatch();
   const { isAuthenticated } = useAppSelector((state) => state.auth);
+  const checked = useRef(false);
 
   useEffect(() => {
+    if (checked.current) return;
+    checked.current = true;
+
     const token = localStorage.getItem(STORAGE_KEYS.TOKEN);
     if (!token) {
       router.replace("/signin");
@@ -26,13 +30,24 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
     const storedUser = localStorage.getItem(STORAGE_KEYS.USER);
     if (storedUser) {
       try {
-        dispatch(setCredentials({ user: JSON.parse(storedUser), token }));
-      } catch {}
+        const parsed = JSON.parse(storedUser);
+        if (parsed?.id) {
+          dispatch(setCredentials({ user: parsed, token }));
+        }
+      } catch {
+        // stored data corrupt – will be caught by checkAuth
+      }
     }
 
-    dispatch(checkAuth()).catch(() => {
-      router.replace("/signin");
-    });
+    dispatch(checkAuth())
+      .unwrap()
+      .then((result) => {
+        dispatch(setCredentials(result));
+      })
+      .catch(() => {
+        dispatch(logout());
+        router.replace("/signin");
+      });
   }, [dispatch, router]);
 
   if (!isAuthenticated) {

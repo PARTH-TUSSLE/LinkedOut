@@ -1,4 +1,5 @@
 import { PublicNavbar } from "@/components/layout/PublicNavbar";
+import { PublicLayoutClient } from "@/components/layout/PublicLayoutClient";
 
 export default function PublicLayout({
   children,
@@ -8,7 +9,9 @@ export default function PublicLayout({
   return (
     <div className="min-h-screen bg-bg">
       <PublicNavbar />
-      <main>{children}</main>
+      <main>
+        <PublicLayoutClient>{children}</PublicLayoutClient>
+      </main>
     </div>
   );
 }
