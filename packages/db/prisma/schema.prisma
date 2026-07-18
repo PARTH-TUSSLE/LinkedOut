@@ -45,7 +45,7 @@ model Profile {
 }
 
 model Education {
-  id           Int     @id @default(autoincrement())
+  id           Int      @id @default(autoincrement())
   profileId    Int     
   profile      Profile @relation(fields: [profileId], references: [id], onDelete: Cascade)
 
@@ -53,9 +53,8 @@ model Education {
   degree       String  @default("")
   fieldOfStudy String  @default("")
   
-  startYear    Int?    
-  endYear      Int?    
-
+  startDate    DateTime?    
+  endDate      DateTime?    
 }
 
 
@@ -99,6 +98,7 @@ model Connection {
   receiverId      Int
   receiver        User      @relation("receivedConnections",fields: [receiverId],references: [id])
   status          String    @default("pending")
+  createdAt       DateTime  @default(now())
   @@unique([senderId, receiverId])
 }
 

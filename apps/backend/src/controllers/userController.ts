@@ -125,7 +125,7 @@ const convertUserDataToPDF = async (userData: any): Promise<string> => {
       doc
         .fontSize(12)
         .text(
-          `  Years: ${education.startYear || "N/A"} - ${education.endYear || "N/A"}`
+          `  Years: ${education.startDate ? new Date(education.startDate).getFullYear() : "N/A"} - ${education.endDate ? new Date(education.endDate).getFullYear() : "N/A"}`
         );
       doc.moveDown(0.8);
     });
@@ -622,8 +622,8 @@ export const downloadProfileController = async (
                 school: true,
                 degree: true,
                 fieldOfStudy: true,
-                startYear: true,
-                endYear: true,
+                startDate: true,
+                endDate: true,
               },
             },
             workHistory: {
@@ -912,7 +912,7 @@ export const myConnectionsController = async (req: Request, res: Response) => {
       const otherUser = conn.senderId === id ? conn.receiver : conn.sender;
       return {
         connectionId: conn.connectionId,
-        connectedAt: conn.status,
+        connectedAt: conn.createdAt,
         user: otherUser,
       };
     });
