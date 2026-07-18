@@ -33,6 +33,7 @@
     scroll-behavior: smooth;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    overflow: hidden;
   }
 
   body {
@@ -40,6 +41,7 @@
       Roboto, "Helvetica Neue", Arial, sans-serif;
     background-color: var(--color-bg);
     color: var(--color-text-primary);
+    overflow: hidden;
   }
 
   ::selection {
@@ -47,3 +49,12 @@
     color: var(--color-primary);
   }
 }
+
+@utility scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
