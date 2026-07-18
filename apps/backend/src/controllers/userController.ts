@@ -519,22 +519,39 @@ export const updateUserProfileController = async (
 
 export const getAllUsersController = async (req: Request, res: Response) => {
   try {
-    const profiles = await client.profile.findMany({
-      include: {
-        user: {
-          select: {
-            name: true,
-            username: true,
-            email: true,
-            profilePicture: true,
+    const page = Math.max(1, parseInt(req.query.page as string) || 1);
+    const limit = Math.min(50, Math.max(1, parseInt(req.query.limit as string) || 10));
+    const skip = (page - 1) * limit;
+
+    const [profiles, total] = await Promise.all([
+      client.profile.findMany({
+        skip,
+        take: limit,
+        include: {
+          user: {
+            select: {
+              name: true,
+              username: true,
+              email: true,
+              profilePicture: true,
+            },
           },
+          education: true,
+          workHistory: true,
         },
-        education: true,
-        workHistory: true,
+      }),
+      client.profile.count(),
+    ]);
+
+    return res.json({
+      profiles,
+      pagination: {
+        page,
+        limit,
+        total,
+        totalPages: Math.ceil(total / limit),
       },
     });
-
-    return res.json({ profiles });
   } catch (error) {
     return res.status(500).json({
       message:
@@ -716,23 +733,38 @@ export const mySentReqsController = async (req: Request, res: Response) => {
   }
 
   try {
-    const reqs = await client.connection.findMany({
-      where: {
-        senderId: id,
-      },
-      include: {
-        receiver: {
-          select: {
-            id: true,
-            name: true,
-            username: true,
+    const page = Math.max(1, parseInt(req.query.page as string) || 1);
+    const limit = Math.min(50, Math.max(1, parseInt(req.query.limit as string) || 10));
+    const skip = (page - 1) * limit;
+
+    const where = { senderId: id };
+
+    const [reqs, total] = await Promise.all([
+      client.connection.findMany({
+        skip,
+        take: limit,
+        where,
+        include: {
+          receiver: {
+            select: {
+              id: true,
+              name: true,
+              username: true,
+            },
           },
         },
-      },
-    });
+      }),
+      client.connection.count({ where }),
+    ]);
 
     return res.json({
       reqs,
+      pagination: {
+        page,
+        limit,
+        total,
+        totalPages: Math.ceil(total / limit),
+      },
     });
   } catch (error) {
     return res.status(500).json({
@@ -751,23 +783,38 @@ export const myReceivedReqsController = async (req: Request, res: Response) => {
   }
 
   try {
-    const reqs = await client.connection.findMany({
-      where: {
-        receiverId: id,
-      },
-      include: {
-        sender: {
-          select: {
-            id: true,
-            name: true,
-            username: true,
+    const page = Math.max(1, parseInt(req.query.page as string) || 1);
+    const limit = Math.min(50, Math.max(1, parseInt(req.query.limit as string) || 10));
+    const skip = (page - 1) * limit;
+
+    const where = { receiverId: id };
+
+    const [reqs, total] = await Promise.all([
+      client.connection.findMany({
+        skip,
+        take: limit,
+        where,
+        include: {
+          sender: {
+            select: {
+              id: true,
+              name: true,
+              username: true,
+            },
           },
         },
-      },
-    });
+      }),
+      client.connection.count({ where }),
+    ]);
 
     return res.json({
       reqs,
+      pagination: {
+        page,
+        limit,
+        total,
+        totalPages: Math.ceil(total / limit),
+      },
     });
   } catch (error) {
     return res.status(500).json({
@@ -786,35 +833,46 @@ export const myConnectionsController = async (req: Request, res: Response) => {
   }
 
   try {
-    const connections = await client.connection.findMany({
-      where: {
-        status: "accepted",
-        OR: [
-          { senderId: id },
-          { receiverId: id },
-        ],
-      },
-      include: {
-        sender: {
-          select: {
-            id: true,
-            name: true,
-            username: true,
-            email: true,
-            profilePicture: true,
+    const page = Math.max(1, parseInt(req.query.page as string) || 1);
+    const limit = Math.min(50, Math.max(1, parseInt(req.query.limit as string) || 10));
+    const skip = (page - 1) * limit;
+
+    const where = {
+      status: "accepted",
+      OR: [
+        { senderId: id },
+        { receiverId: id },
+      ],
+    } as const;
+
+    const [connections, total] = await Promise.all([
+      client.connection.findMany({
+        skip,
+        take: limit,
+        where,
+        include: {
+          sender: {
+            select: {
+              id: true,
+              name: true,
+              username: true,
+              email: true,
+              profilePicture: true,
+            },
+          },
+          receiver: {
+            select: {
+              id: true,
+              name: true,
+              username: true,
+              email: true,
+              profilePicture: true,
+            },
           },
         },
-        receiver: {
-          select: {
-            id: true,
-            name: true,
-            username: true,
-            email: true,
-            profilePicture: true,
-          },
-        },
-      },
-    });
+      }),
+      client.connection.count({ where }),
+    ]);
 
     const connectedUsers = connections.map((conn) => {
       const otherUser = conn.senderId === id ? conn.receiver : conn.sender;
@@ -827,6 +885,12 @@ export const myConnectionsController = async (req: Request, res: Response) => {
 
     return res.json({
       connections: connectedUsers,
+      pagination: {
+        page,
+        limit,
+        total,
+        totalPages: Math.ceil(total / limit),
+      },
     });
   } catch (error) {
     return res.status(500).json({

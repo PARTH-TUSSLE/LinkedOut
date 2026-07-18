@@ -40,24 +40,39 @@ export const createPostController = async (req: Request, res: Response) => {
 
 export const getAllPostsController = async (req: Request, res: Response) => {
   try {
-    const posts = await client.post.findMany({
-      orderBy: {
-        createdAt: "desc",
-      },
-      include: {
-        creator: {
-          select: {
-            id: true,
-            name: true,
-            username: true,
-            profilePicture: true,
+    const page = Math.max(1, parseInt(req.query.page as string) || 1);
+    const limit = Math.min(50, Math.max(1, parseInt(req.query.limit as string) || 10));
+    const skip = (page - 1) * limit;
+
+    const [posts, total] = await Promise.all([
+      client.post.findMany({
+        skip,
+        take: limit,
+        orderBy: {
+          createdAt: "desc",
+        },
+        include: {
+          creator: {
+            select: {
+              id: true,
+              name: true,
+              username: true,
+              profilePicture: true,
+            },
           },
         },
-      },
-    });
+      }),
+      client.post.count(),
+    ]);
 
     return res.json({
       posts,
+      pagination: {
+        page,
+        limit,
+        total,
+        totalPages: Math.ceil(total / limit),
+      },
     });
   } catch (error) {
     res.status(500).json({
@@ -186,30 +201,43 @@ export const getAllCommentsOnPostController = async (
   }
 
   try {
-    const comments = await client.comment.findMany({
-      where: {
-        postId: postId,
-      },
-      include: {
-        creator: {
-          select: {
-            id: true,
-            name: true,
-            username: true,
-            profilePicture: true,
+    const page = Math.max(1, parseInt(req.query.page as string) || 1);
+    const limit = Math.min(50, Math.max(1, parseInt(req.query.limit as string) || 10));
+    const skip = (page - 1) * limit;
+
+    const [comments, total] = await Promise.all([
+      client.comment.findMany({
+        skip,
+        take: limit,
+        where: {
+          postId: postId,
+        },
+        include: {
+          creator: {
+            select: {
+              id: true,
+              name: true,
+              username: true,
+              profilePicture: true,
+            },
           },
         },
-      },
-    });
-
-    if (comments.length === 0) {
-      return res.json({
-        msg: "No comments found!",
-      });
-    }
+      }),
+      client.comment.count({
+        where: {
+          postId: postId,
+        },
+      }),
+    ]);
 
     return res.json({
       comments,
+      pagination: {
+        page,
+        limit,
+        total,
+        totalPages: Math.ceil(total / limit),
+      },
     });
   } catch (error) {
     return res.status(500).json({
