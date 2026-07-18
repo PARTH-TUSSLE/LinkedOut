@@ -1,5 +1,7 @@
 import { client } from "@repo/db/client";
 import { Request, Response } from "express";
+import fs from "fs";
+import path from "path";
 
 export const createPostController = async (req: Request, res: Response) => {
   const id = Number(req.userId);
@@ -111,6 +113,15 @@ export const deletePostController = async (req: Request, res: Response) => {
     }
 
     if (postToBeDeleted.creatorId === id) {
+      if (postToBeDeleted.media && postToBeDeleted.media.trim() !== "") {
+        const mediaPath = path.join(process.cwd(), "uploads", postToBeDeleted.media);
+        fs.unlink(mediaPath, (err) => {
+          if (err && err.code !== "ENOENT") {
+            console.error("Failed to delete post media:", err);
+          }
+        });
+      }
+
       const deletedPost = await client.post.delete({
         where: {
           postId: postId,
