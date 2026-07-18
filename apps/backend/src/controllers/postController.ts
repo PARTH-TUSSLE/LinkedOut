@@ -8,13 +8,13 @@ export const createPostController = async (req: Request, res: Response) => {
   const { body } = req.body;
 
   if (!id || isNaN(id)) {
-    return res.json({
+    return res.status(401).json({
       msg: "Not authorized !",
     });
   }
 
   if (!body || body.trim() === "") {
-    return res.json({
+    return res.status(400).json({
       msg: "Post body is required!",
     });
   }
@@ -88,13 +88,13 @@ export const deletePostController = async (req: Request, res: Response) => {
   const postId = Number(req.body.postId);
 
   if (!postId || isNaN(postId)) {
-    return res.json({
+    return res.status(400).json({
       msg: "Missing or Invalid postID",
     });
   }
 
   if (!id || isNaN(id)) {
-    return res.json({
+    return res.status(401).json({
       msg: "Invalid userID",
     });
   }
@@ -107,7 +107,7 @@ export const deletePostController = async (req: Request, res: Response) => {
     });
 
     if (!postToBeDeleted) {
-      return res.json({
+      return res.status(404).json({
         msg: "Post not found!",
       });
     }
@@ -132,12 +132,12 @@ export const deletePostController = async (req: Request, res: Response) => {
         deletedPost,
       });
     } else {
-      return res.json({
+      return res.status(403).json({
         msg: "User not authorized to delete",
       });
     }
   } catch (error) {
-    return res.json({
+    return res.status(500).json({
       msg: "Some error occurred!",
       error,
     });
@@ -150,19 +150,19 @@ export const addCommentController = async (req: Request, res: Response) => {
   const commentBody = req.body.commentBody;
 
   if (!id || isNaN(id)) {
-    return res.json({
+    return res.status(401).json({
       msg: "Invalid userID",
     });
   }
 
   if (!postId || isNaN(postId)) {
-    return res.json({
+    return res.status(400).json({
       msg: "Missing or Invalid postID",
     });
   }
 
   if (!commentBody) {
-    return res.json({
+    return res.status(400).json({
       msg: "Comment body cannot be empty!",
     });
   }
@@ -175,7 +175,7 @@ export const addCommentController = async (req: Request, res: Response) => {
     });
 
     if (!post) {
-      return res.json({
+      return res.status(404).json({
         msg: "Post not found!",
       });
     }
@@ -206,7 +206,7 @@ export const getAllCommentsOnPostController = async (
   const postId = Number(req.params.postId);
 
   if (!postId || isNaN(postId)) {
-    return res.json({
+    return res.status(400).json({
       msg: "Invalid postID",
     });
   }
@@ -263,13 +263,13 @@ export const deleteCommentController = async (req: Request, res: Response) => {
   const commentId = Number(req.body.commentId);
 
   if (!id || isNaN(id)) {
-    return res.json({
+    return res.status(401).json({
       msg: "Invalid userId!",
     });
   }
 
   if (!commentId || isNaN(commentId)) {
-    return res.json({
+    return res.status(400).json({
       msg: "Invalid commentId!",
     });
   }
@@ -282,7 +282,7 @@ export const deleteCommentController = async (req: Request, res: Response) => {
     });
 
     if (!comment) {
-      return res.json({
+      return res.status(404).json({
         msg: "Comment not found!",
       });
     }
@@ -298,7 +298,7 @@ export const deleteCommentController = async (req: Request, res: Response) => {
         deletedComment,
       });
     } else {
-      return res.json({
+      return res.status(403).json({
         msg: "User not authorized to delete this comment",
       });
     }
@@ -317,13 +317,13 @@ export const increasePostLikeController = async (
   const postId = Number(req.body.postId);
 
   if (!id || isNaN(id)) {
-    return res.json({
+    return res.status(401).json({
       msg: "Invalid userId",
     });
   }
 
   if (!postId || isNaN(postId)) {
-    return res.json({
+    return res.status(400).json({
       msg: "Invalid postId",
     });
   }
@@ -336,7 +336,7 @@ export const increasePostLikeController = async (
     });
 
     if (!post) {
-      return res.json({
+      return res.status(404).json({
         msg: "Post not found!",
       });
     }
@@ -348,7 +348,7 @@ export const increasePostLikeController = async (
     });
 
     if (existingLike) {
-      return res.json({
+      return res.status(409).json({
         msg: "Post already liked!",
       });
     }
@@ -363,7 +363,7 @@ export const increasePostLikeController = async (
       }),
     ]);
 
-    return res.json({
+    return res.status(200).json({
       msg: "Increased like count by 1",
     });
   } catch (error) {
@@ -381,13 +381,13 @@ export const decreasePostLikeController = async (
   const postId = Number(req.body.postId);
 
   if (!id || isNaN(id)) {
-    return res.json({
+    return res.status(401).json({
       msg: "Invalid userId",
     });
   }
 
   if (!postId || isNaN(postId)) {
-    return res.json({
+    return res.status(400).json({
       msg: "Invalid postId",
     });
   }
@@ -400,7 +400,7 @@ export const decreasePostLikeController = async (
     });
 
     if (!existingLike) {
-      return res.json({
+      return res.status(404).json({
         msg: "You haven't liked this post!",
       });
     }

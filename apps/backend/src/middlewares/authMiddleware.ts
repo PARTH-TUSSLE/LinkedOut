@@ -11,39 +11,28 @@ declare global {
   }
 }
 
-export const authMiddleware = ( req: Request, res: Response, next: NextFunction ) => {
-
+export const authMiddleware = (req: Request, res: Response, next: NextFunction) => {
   const token = req.headers["authorization"];
 
   try {
-    if ( !token ) {
-    res.json({
-      msg: "Unauthorized!"
-    })
-    return
-  }
+    if (!token) {
+      res.status(401).json({ msg: "Unauthorized!" });
+      return;
+    }
 
-  if ( !process.env.JWT_SECRET ) {
-    res.json({
-      msg: "JWT_SECRET not configured!"
-    })
-    return
-  }
+    if (!process.env.JWT_SECRET) {
+      res.status(500).json({ msg: "JWT_SECRET not configured!" });
+      return;
+    }
 
-  const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-  if (decoded) {
-    req.userId = (decoded as JwtPayload).id;
-  }
+    if (decoded) {
+      req.userId = (decoded as JwtPayload).id;
+    }
 
-  next();
-
-
+    next();
   } catch (error) {
-    res.json({
-      msg: "Unauthorized!",
-    });
+    res.status(401).json({ msg: "Unauthorized!" });
   }
-
-
-}
+};

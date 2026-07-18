@@ -335,7 +335,7 @@ export const updateUserController = async (req: Request, res: Response) => {
     const userId = req.userId;
 
     if (!userId) {
-      res.json({
+      res.status(401).json({
         msg: "You're not unauthorized!",
       });
       return;
@@ -351,7 +351,7 @@ export const updateUserController = async (req: Request, res: Response) => {
     });
 
     if (!user) {
-      res.json({
+      res.status(404).json({
         msg: "User not found!",
       });
       return;
@@ -373,7 +373,7 @@ export const updateUserController = async (req: Request, res: Response) => {
           email: email,
         },
       });
-      res.json({ msg: "User updated successfully!", updatedUser });
+      res.status(200).json({ msg: "User updated successfully!", updatedUser });
       return;
     }
 
@@ -387,7 +387,7 @@ export const updateUserController = async (req: Request, res: Response) => {
           email: email,
         },
       });
-      res.json({ msg: "User updated successfully!", updatedUser });
+      res.status(200).json({ msg: "User updated successfully!", updatedUser });
       return;
     }
 
@@ -414,7 +414,7 @@ export const getUserAndProfileController = async (
     });
 
     if (!user) {
-      res.json({
+      res.status(404).json({
         msg: "user not found!",
       });
       return;
@@ -464,7 +464,7 @@ export const updateUserProfileController = async (
       req.body;
 
     if (!userId) {
-      res.json({
+      res.status(401).json({
         msg: "User not found!",
       });
       return;
@@ -696,7 +696,7 @@ export const sendConnectionReqController = async (
     const id = Number(req.userId);
 
     if (!id) {
-      return res.json({
+      return res.status(401).json({
         msg: "Not authorized!",
       });
     }
@@ -704,13 +704,13 @@ export const sendConnectionReqController = async (
     const receiverId = Number(req.body.receiverId);
 
     if (!receiverId || isNaN(receiverId) || receiverId <= 0) {
-      return res.json({
+      return res.status(400).json({
         msg: "Invalid receiver ID",
       });
     }
 
     if (id === receiverId) {
-      return res.json({
+      return res.status(400).json({
         msg: "Cannot send request to yourself",
       });
     }
@@ -722,7 +722,7 @@ export const sendConnectionReqController = async (
     });
 
     if (!receiver) {
-      return res.json({
+      return res.status(404).json({
         msg: "No user found",
       });
     }
@@ -737,7 +737,7 @@ export const sendConnectionReqController = async (
     });
 
     if (isConnected) {
-      return res.json({
+      return res.status(409).json({
         msg: "Connection req already sent!",
       });
     } else {
@@ -763,7 +763,7 @@ export const mySentReqsController = async (req: Request, res: Response) => {
   const id = Number(req.userId);
 
   if (!id || isNaN(id)) {
-    return res.json({
+    return res.status(401).json({
       msg: "Not authorized !",
     });
   }
@@ -813,7 +813,7 @@ export const myReceivedReqsController = async (req: Request, res: Response) => {
   const id = Number(req.userId);
 
   if (!id || isNaN(id)) {
-    return res.json({
+    return res.status(401).json({
       msg: "Not authorized !",
     });
   }
@@ -863,7 +863,7 @@ export const myConnectionsController = async (req: Request, res: Response) => {
   const id = Number(req.userId);
 
   if (!id || isNaN(id)) {
-    return res.json({
+    return res.status(401).json({
       msg: "Not authorized !",
     });
   }
@@ -879,7 +879,7 @@ export const myConnectionsController = async (req: Request, res: Response) => {
         { senderId: id },
         { receiverId: id },
       ],
-    } as const;
+    };
 
     const [connections, total] = await Promise.all([
       client.connection.findMany({
@@ -940,13 +940,13 @@ export const disconnectController = async (req: Request, res: Response) => {
   const connectionId = Number(req.body.connectionId);
 
   if (!id || isNaN(id)) {
-    return res.json({
+    return res.status(401).json({
       msg: "Not authorized !",
     });
   }
 
   if (!connectionId || isNaN(connectionId)) {
-    return res.json({
+    return res.status(400).json({
       msg: "Invalid connectionId",
     });
   }
@@ -964,7 +964,7 @@ export const disconnectController = async (req: Request, res: Response) => {
     });
 
     if (!connection) {
-      return res.json({
+      return res.status(404).json({
         msg: "Connection not found!",
       });
     }
@@ -994,13 +994,13 @@ export const connectionReqStatusController = async (
   const id = Number(req.userId);
 
   if (!id || isNaN(id)) {
-    return res.json({
+    return res.status(401).json({
       msg: "Not authorized !",
     });
   }
 
   if (!connectionId || isNaN(connectionId)) {
-    return res.json({
+    return res.status(400).json({
       msg: "Invalid connectionId",
     });
   }
@@ -1014,7 +1014,7 @@ export const connectionReqStatusController = async (
     });
 
     if (!connectionReq) {
-      return res.json({
+      return res.status(404).json({
         msg: "Connection req not found !",
       });
     }
@@ -1054,7 +1054,7 @@ export const verifyTokenController = async (req: Request, res: Response) => {
   const id = Number(req.userId);
 
   if (!id || isNaN(id)) {
-    return res.json({
+    return res.status(401).json({
       msg: "Unauthorized!",
     });
   }
@@ -1072,7 +1072,7 @@ export const verifyTokenController = async (req: Request, res: Response) => {
     });
 
     if (!user) {
-      return res.json({
+      return res.status(404).json({
         msg: "User not found!",
       });
     }
