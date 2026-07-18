@@ -526,7 +526,6 @@ export const updateUserProfileController = async (
   } catch (error) {
     res.status(500).json({
       msg: "Some unexpected error occurred!",
-      error,
     });
   }
 };
@@ -590,8 +589,7 @@ export const getAllUsersController = async (req: Request, res: Response) => {
     });
   } catch (error) {
     return res.status(500).json({
-      message:
-        error instanceof Error ? error.message : "Unknown error occurred",
+      msg: error instanceof Error ? error.message : "Unknown error occurred",
     });
   }
 };
@@ -683,7 +681,7 @@ export const downloadProfileController = async (
     console.error("Download profile error:", error);
     res.status(500).json({
       msg: "Some unexpected error occurred!",
-      error: error instanceof Error ? error.message : "Unknown error",
+      error: "Unknown error",
     });
   }
 };
@@ -1045,7 +1043,6 @@ export const connectionReqStatusController = async (
   } catch (error) {
     return res.status(500).json({
       msg: "Some error occured !",
-      error,
     });
   }
 };

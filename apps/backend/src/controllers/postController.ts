@@ -139,7 +139,6 @@ export const deletePostController = async (req: Request, res: Response) => {
   } catch (error) {
     return res.status(500).json({
       msg: "Some error occurred!",
-      error,
     });
   }
 };
@@ -194,7 +193,6 @@ export const addCommentController = async (req: Request, res: Response) => {
   } catch (error) {
     return res.status(500).json({
       msg: "Some error occurred!",
-      error,
     });
   }
 };
@@ -253,7 +251,6 @@ export const getAllCommentsOnPostController = async (
   } catch (error) {
     return res.status(500).json({
       msg: "Some error occured!",
-      error,
     });
   }
 };
