@@ -522,11 +522,33 @@ export const getAllUsersController = async (req: Request, res: Response) => {
     const page = Math.max(1, parseInt(req.query.page as string) || 1);
     const limit = Math.min(50, Math.max(1, parseInt(req.query.limit as string) || 10));
     const skip = (page - 1) * limit;
+    const search = (req.query.search as string) || "";
+    const location = (req.query.location as string) || "";
+    const occupation = (req.query.occupation as string) || "";
+
+    const where: any = {};
+
+    if (search) {
+      where.OR = [
+        { user: { name: { contains: search, mode: "insensitive" } } },
+        { user: { username: { contains: search, mode: "insensitive" } } },
+        { user: { email: { contains: search, mode: "insensitive" } } },
+      ];
+    }
+
+    if (location) {
+      where.location = { contains: location, mode: "insensitive" };
+    }
+
+    if (occupation) {
+      where.occupationStatus = { contains: occupation, mode: "insensitive" };
+    }
 
     const [profiles, total] = await Promise.all([
       client.profile.findMany({
         skip,
         take: limit,
+        where,
         include: {
           user: {
             select: {
@@ -540,7 +562,7 @@ export const getAllUsersController = async (req: Request, res: Response) => {
           workHistory: true,
         },
       }),
-      client.profile.count(),
+      client.profile.count({ where }),
     ]);
 
     return res.json({
