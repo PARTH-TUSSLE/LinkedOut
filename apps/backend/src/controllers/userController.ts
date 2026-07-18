@@ -42,6 +42,7 @@ import "dotenv/config";
 import PDFDocument from "pdfkit";
 import randomString from "randomstring";
 import fs from "fs";
+import path from "path";
 
 const convertUserDataToPDF = async (userData: any): Promise<string> => {
   const doc = new PDFDocument();
@@ -300,6 +301,19 @@ export const uploadProfilePicture = async (req: Request, res: Response) => {
 
     if (!req.file || !req.file.filename) {
       return res.status(400).json({ msg: "No file uploaded" });
+    }
+
+    const currentUser = await client.user.findFirst({
+      where: { id: Number(userId) },
+    });
+
+    if (currentUser && currentUser.profilePicture && currentUser.profilePicture !== "default.jpeg") {
+      const oldPath = path.join(process.cwd(), "uploads", currentUser.profilePicture);
+      fs.unlink(oldPath, (err) => {
+        if (err && err.code !== "ENOENT") {
+          console.error("Failed to delete old profile picture:", err);
+        }
+      });
     }
 
     const updated = await client.user.update({
