@@ -1035,3 +1035,40 @@ export const connectionReqStatusController = async (
     });
   }
 };
+
+export const verifyTokenController = async (req: Request, res: Response) => {
+  const id = Number(req.userId);
+
+  if (!id || isNaN(id)) {
+    return res.json({
+      msg: "Unauthorized!",
+    });
+  }
+
+  try {
+    const user = await client.user.findFirst({
+      where: { id },
+      select: {
+        id: true,
+        name: true,
+        username: true,
+        email: true,
+        profilePicture: true,
+      },
+    });
+
+    if (!user) {
+      return res.json({
+        msg: "User not found!",
+      });
+    }
+
+    return res.json({
+      user,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      msg: "Some error occured!",
+    });
+  }
+};

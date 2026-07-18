@@ -15,6 +15,7 @@ import {
   updateUserController,
   updateUserProfileController,
   uploadProfilePicture,
+  verifyTokenController,
 } from "../controllers/userController.js";
 import multer from "multer";
 import { authMiddleware } from "../middlewares/authMiddleware.js";
@@ -80,6 +81,11 @@ userRouter.post(
   "/user/disconnect",
   authMiddleware,
   disconnectController
+);
+userRouter.get(
+  "/verify-token",
+  authMiddleware,
+  verifyTokenController
 );
 
 export default userRouter;
