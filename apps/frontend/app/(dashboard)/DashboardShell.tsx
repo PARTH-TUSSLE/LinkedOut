@@ -3,8 +3,7 @@
 import { useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { useAppSelector, useAppDispatch } from "@/store/hooks";
-import { checkAuth } from "@/store/thunks/authThunks";
-import { setCredentials, logout } from "@/store/slices/authSlice";
+import { setCredentials } from "@/store/slices/authSlice";
 import { STORAGE_KEYS } from "@/config/constants";
 import { Navbar } from "@/components/layout/Navbar";
 import { Sidebar } from "@/components/layout/Sidebar";
@@ -33,21 +32,14 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
         const parsed = JSON.parse(storedUser);
         if (parsed?.id) {
           dispatch(setCredentials({ user: parsed, token }));
+          return;
         }
       } catch {
-        // stored data corrupt – will be caught by checkAuth
+        // corrupt — fall through to redirect
       }
     }
 
-    dispatch(checkAuth())
-      .unwrap()
-      .then((result) => {
-        dispatch(setCredentials(result));
-      })
-      .catch(() => {
-        dispatch(logout());
-        router.replace("/signin");
-      });
+    router.replace("/signin");
   }, [dispatch, router]);
 
   if (!isAuthenticated) {

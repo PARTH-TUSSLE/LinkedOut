@@ -4,10 +4,9 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { useRouter } from "next/navigation";
 import { useAppDispatch } from "@/store/hooks";
 import { loginUser } from "@/store/thunks/authThunks";
-import { setCredentials, setLoading } from "@/store/slices/authSlice";
+import { setLoading } from "@/store/slices/authSlice";
 import { addToast } from "@/store/slices/uiSlice";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
@@ -21,7 +20,6 @@ const schema = z.object({
 type FormData = z.infer<typeof schema>;
 
 export function SignInForm() {
-  const router = useRouter();
   const dispatch = useAppDispatch();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -38,7 +36,7 @@ export function SignInForm() {
     dispatch(setLoading(true));
 
     try {
-      const result = await dispatch(
+      await dispatch(
         loginUser({
           username: data.username || undefined,
           email: data.email || undefined,
@@ -46,8 +44,7 @@ export function SignInForm() {
         })
       ).unwrap();
 
-      dispatch(setCredentials(result));
-      router.push("/dashboard");
+      window.location.href = "/dashboard";
     } catch (error: any) {
       dispatch(
         addToast({
