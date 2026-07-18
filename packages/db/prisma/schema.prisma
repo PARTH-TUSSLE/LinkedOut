@@ -27,6 +27,7 @@ model User {
   sentConnections     Connection[]  @relation("sentConnections")
   receivedConnections Connection[]  @relation("receivedConnections")
   comments            Comment[]
+  likes               Like[]
 }
 
 
@@ -84,7 +85,8 @@ model Post {
  media          String      @default("")
  active         Boolean     @default(true)
  fileType       String      @default("")
- comments       Comment[]
+  comments       Comment[]
+  postLikes      Like[]
 }
 
 
@@ -110,4 +112,14 @@ model Comment {
   creator           User    @relation(fields: [creatorId], references: [id])
   postId            Int
   post              Post    @relation(fields: [postId], references: [postId], onDelete: Cascade)
+}
+
+model Like {
+  id        Int   @id @default(autoincrement())
+  userId    Int
+  user      User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  postId    Int
+  post      Post  @relation(fields: [postId], references: [postId], onDelete: Cascade)
+
+  @@unique([userId, postId])
 }

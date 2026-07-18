@@ -341,16 +341,27 @@ export const increasePostLikeController = async (
       });
     }
 
-    await client.post.update({
+    const existingLike = await client.like.findUnique({
       where: {
-        postId: postId,
-      },
-      data: {
-        likes: {
-          increment: 1,
-        },
+        userId_postId: { userId: id, postId: postId },
       },
     });
+
+    if (existingLike) {
+      return res.json({
+        msg: "Post already liked!",
+      });
+    }
+
+    await client.$transaction([
+      client.like.create({
+        data: { userId: id, postId: postId },
+      }),
+      client.post.update({
+        where: { postId: postId },
+        data: { likes: { increment: 1 } },
+      }),
+    ]);
 
     return res.json({
       msg: "Increased like count by 1",
@@ -382,34 +393,27 @@ export const decreasePostLikeController = async (
   }
 
   try {
-    const post = await client.post.findFirst({
+    const existingLike = await client.like.findUnique({
       where: {
-        postId: postId,
+        userId_postId: { userId: id, postId: postId },
       },
     });
 
-    if (!post) {
+    if (!existingLike) {
       return res.json({
-        msg: "Post not found!",
+        msg: "You haven't liked this post!",
       });
     }
 
-    if (post.likes <= 0) {
-      return res.json({
-        msg: "Cannot decrement below 0",
-      });
-    }
-
-    await client.post.update({
-      where: {
-        postId: postId,
-      },
-      data: {
-        likes: {
-          decrement: 1,
-        },
-      },
-    });
+    await client.$transaction([
+      client.like.delete({
+        where: { id: existingLike.id },
+      }),
+      client.post.update({
+        where: { postId: postId },
+        data: { likes: { decrement: 1 } },
+      }),
+    ]);
 
     return res.json({
       msg: "Decreased like count by 1",
