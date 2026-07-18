@@ -1,6 +1,7 @@
 import { Router } from "express";
 import {
   connectionReqStatusController,
+  disconnectController,
   downloadProfileController,
   getAllUsersController,
   getUserAndProfileController,
@@ -74,6 +75,11 @@ userRouter.get(
   "/user/connections",
   authMiddleware,
   myConnectionsController
+);
+userRouter.post(
+  "/user/disconnect",
+  authMiddleware,
+  disconnectController
 );
 
 export default userRouter;

@@ -835,6 +835,56 @@ export const myConnectionsController = async (req: Request, res: Response) => {
   }
 };
 
+export const disconnectController = async (req: Request, res: Response) => {
+  const id = Number(req.userId);
+  const connectionId = Number(req.body.connectionId);
+
+  if (!id || isNaN(id)) {
+    return res.json({
+      msg: "Not authorized !",
+    });
+  }
+
+  if (!connectionId || isNaN(connectionId)) {
+    return res.json({
+      msg: "Invalid connectionId",
+    });
+  }
+
+  try {
+    const connection = await client.connection.findFirst({
+      where: {
+        connectionId: connectionId,
+        status: "accepted",
+        OR: [
+          { senderId: id },
+          { receiverId: id },
+        ],
+      },
+    });
+
+    if (!connection) {
+      return res.json({
+        msg: "Connection not found!",
+      });
+    }
+
+    await client.connection.delete({
+      where: {
+        connectionId: connectionId,
+      },
+    });
+
+    return res.json({
+      msg: "Disconnected successfully!",
+    });
+  } catch (error) {
+    return res.status(500).json({
+      msg: "Some error occured !",
+    });
+  }
+};
+
 export const connectionReqStatusController = async (
   req: Request,
   res: Response
