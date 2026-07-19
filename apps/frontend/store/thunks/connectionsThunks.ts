@@ -7,8 +7,7 @@ export const fetchAllUsers = createAsyncThunk(
   async (_, { rejectWithValue }) => {
     try {
       const response = await api.get("/getAllUsers?limit=50");
-      const profiles = response.data.profiles || [];
-      return profiles as Profile[];
+      return (response.data.profiles || []) as Profile[];
     } catch (error: any) {
       return rejectWithValue(
         error.response?.data?.msg || "Failed to fetch users"
@@ -24,7 +23,7 @@ export const sendConnectionRequest = createAsyncThunk(
       const response = await api.post("/user/send_request_connection", {
         receiverId,
       });
-      return { receiverId, msg: response.data.msg };
+      return { receiverId, connection: response.data.connection as Connection };
     } catch (error: any) {
       return rejectWithValue(
         error.response?.data?.msg || "Failed to send request"
@@ -38,8 +37,7 @@ export const fetchSentRequests = createAsyncThunk(
   async (_, { rejectWithValue }) => {
     try {
       const response = await api.get("/user/my_sent_reqs");
-      const reqs = response.data.reqs || [];
-      return reqs as Connection[];
+      return (response.data.reqs || []) as Connection[];
     } catch (error: any) {
       return rejectWithValue(
         error.response?.data?.msg || "Failed to fetch sent requests"
@@ -53,8 +51,7 @@ export const fetchReceivedRequests = createAsyncThunk(
   async (_, { rejectWithValue }) => {
     try {
       const response = await api.get("/user/my_received_reqs");
-      const reqs = response.data.reqs || [];
-      return reqs as Connection[];
+      return (response.data.reqs || []) as Connection[];
     } catch (error: any) {
       return rejectWithValue(
         error.response?.data?.msg || "Failed to fetch received requests"
@@ -67,11 +64,14 @@ export const acceptConnectionRequest = createAsyncThunk(
   "connections/accept",
   async (connectionId: number, { rejectWithValue }) => {
     try {
-      await api.post("/user/connection_Req_Status", {
+      const response = await api.post("/user/connection_Req_Status", {
         connectionId,
         actionType: "accept",
       });
-      return connectionId;
+      return {
+        connectionId,
+        connection: response.data.connection as Connection,
+      };
     } catch (error: any) {
       return rejectWithValue(
         error.response?.data?.msg || "Failed to accept request"
@@ -92,6 +92,34 @@ export const rejectConnectionRequest = createAsyncThunk(
     } catch (error: any) {
       return rejectWithValue(
         error.response?.data?.msg || "Failed to reject request"
+      );
+    }
+  }
+);
+
+export const cancelConnectionRequest = createAsyncThunk(
+  "connections/cancel",
+  async (connectionId: number, { rejectWithValue }) => {
+    try {
+      await api.post("/user/cancel_request", { connectionId });
+      return connectionId;
+    } catch (error: any) {
+      return rejectWithValue(
+        error.response?.data?.msg || "Failed to cancel request"
+      );
+    }
+  }
+);
+
+export const disconnectConnection = createAsyncThunk(
+  "connections/disconnect",
+  async (connectionId: number, { rejectWithValue }) => {
+    try {
+      await api.post("/user/disconnect", { connectionId });
+      return connectionId;
+    } catch (error: any) {
+      return rejectWithValue(
+        error.response?.data?.msg || "Failed to disconnect"
       );
     }
   }
