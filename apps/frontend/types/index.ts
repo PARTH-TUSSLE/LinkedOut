@@ -91,12 +91,30 @@ export interface Connection {
     id: number;
     name: string;
     username: string;
+    profilePicture?: string;
   };
   receiver?: {
     id: number;
     name: string;
     username: string;
+    profilePicture?: string;
   };
+}
+
+export const ConnectionStatus = {
+  IDLE: "idle",
+  PENDING_SENT: "pending_sent",
+  PENDING_RECEIVED: "pending_received",
+  CONNECTED: "connected",
+} as const;
+
+export type ConnectionStatus = (typeof ConnectionStatus)[keyof typeof ConnectionStatus];
+
+export interface StatusInfo {
+  status: ConnectionStatus;
+  connectionId: number | null;
+  direction: "sent" | "received" | null;
+  createdAt: string | null;
 }
 
 export interface Pagination {
