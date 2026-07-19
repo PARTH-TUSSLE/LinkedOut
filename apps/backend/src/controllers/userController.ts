@@ -694,66 +694,71 @@ export const sendConnectionReqController = async (
     const id = Number(req.userId);
 
     if (!id) {
-      return res.status(401).json({
-        msg: "Not authorized!",
-      });
+      return res.status(401).json({ msg: "Not authorized!" });
     }
 
     const receiverId = Number(req.body.receiverId);
 
     if (!receiverId || isNaN(receiverId) || receiverId <= 0) {
-      return res.status(400).json({
-        msg: "Invalid receiver ID",
-      });
+      return res.status(400).json({ msg: "Invalid receiver ID" });
     }
 
     if (id === receiverId) {
-      return res.status(400).json({
-        msg: "Cannot send request to yourself",
-      });
+      return res.status(400).json({ msg: "Cannot send request to yourself" });
     }
 
-    const receiver = await client.user.findFirst({
-      where: {
-        id: receiverId,
-      },
-    });
-
+    const receiver = await client.user.findFirst({ where: { id: receiverId } });
     if (!receiver) {
-      return res.status(404).json({
-        msg: "No user found",
-      });
+      return res.status(404).json({ msg: "No user found" });
     }
 
-    const isConnected = await client.connection.findFirst({
-      where: {
-        OR: [
-          { senderId: id, receiverId: receiverId },
-          { senderId: receiverId, receiverId: id },
-        ],
-      },
-    });
-
-    if (isConnected) {
-      return res.status(409).json({
-        msg: "Connection req already sent!",
-      });
-    } else {
-      await client.connection.create({
-        data: {
-          senderId: id,
-          receiverId: receiverId,
+    const result = await client.$transaction(async (tx) => {
+      const existing = await tx.connection.findFirst({
+        where: {
+          OR: [
+            { senderId: id, receiverId },
+            { senderId: receiverId, receiverId: id },
+          ],
         },
       });
 
-      return res.json({
-        msg: "Connection req sent successfully!",
+      if (existing) {
+        if (existing.status === "rejected") {
+          const updated = await tx.connection.update({
+            where: { connectionId: existing.connectionId },
+            data: { status: "pending" },
+            include: {
+              receiver: {
+                select: { id: true, name: true, username: true, profilePicture: true },
+              },
+            },
+          });
+          return { connection: updated };
+        }
+        return null;
+      }
+
+      const created = await tx.connection.create({
+        data: { senderId: id, receiverId },
+        include: {
+          receiver: {
+            select: { id: true, name: true, username: true, profilePicture: true },
+          },
+        },
       });
-    }
-  } catch (error) {
-    return res.status(500).json({
-      msg: "Some error occurred!",
+      return { connection: created };
     });
+
+    if (!result) {
+      return res.status(409).json({ msg: "Connection req already sent!" });
+    }
+
+    return res.json({
+      msg: "Connection req sent successfully!",
+      connection: result.connection,
+    });
+  } catch (error) {
+    return res.status(500).json({ msg: "Some error occurred!" });
   }
 };
 
@@ -938,48 +943,70 @@ export const disconnectController = async (req: Request, res: Response) => {
   const connectionId = Number(req.body.connectionId);
 
   if (!id || isNaN(id)) {
-    return res.status(401).json({
-      msg: "Not authorized !",
-    });
+    return res.status(401).json({ msg: "Not authorized !" });
   }
 
   if (!connectionId || isNaN(connectionId)) {
-    return res.status(400).json({
-      msg: "Invalid connectionId",
-    });
+    return res.status(400).json({ msg: "Invalid connectionId" });
   }
 
   try {
-    const connection = await client.connection.findFirst({
-      where: {
-        connectionId: connectionId,
-        status: "accepted",
-        OR: [
-          { senderId: id },
-          { receiverId: id },
-        ],
-      },
-    });
-
-    if (!connection) {
-      return res.status(404).json({
-        msg: "Connection not found!",
+    await client.$transaction(async (tx) => {
+      const connection = await tx.connection.findFirst({
+        where: {
+          connectionId,
+          status: "accepted",
+          OR: [{ senderId: id }, { receiverId: id }],
+        },
       });
+
+      if (!connection) {
+        throw new Error("NOT_FOUND");
+      }
+
+      await tx.connection.delete({ where: { connectionId } });
+    });
+
+    return res.json({ msg: "Disconnected successfully!", connectionId });
+  } catch (error: any) {
+    if (error?.message === "NOT_FOUND") {
+      return res.status(404).json({ msg: "Connection not found!" });
     }
+    return res.status(500).json({ msg: "Some error occured !" });
+  }
+};
 
-    await client.connection.delete({
-      where: {
-        connectionId: connectionId,
-      },
+export const cancelRequestController = async (req: Request, res: Response) => {
+  const id = Number(req.userId);
+  const connectionId = Number(req.body.connectionId);
+
+  if (!id || isNaN(id)) {
+    return res.status(401).json({ msg: "Not authorized !" });
+  }
+
+  if (!connectionId || isNaN(connectionId)) {
+    return res.status(400).json({ msg: "Invalid connectionId" });
+  }
+
+  try {
+    await client.$transaction(async (tx) => {
+      const request = await tx.connection.findFirst({
+        where: { connectionId, senderId: id, status: "pending" },
+      });
+
+      if (!request) {
+        throw new Error("NOT_FOUND");
+      }
+
+      await tx.connection.delete({ where: { connectionId } });
     });
 
-    return res.json({
-      msg: "Disconnected successfully!",
-    });
-  } catch (error) {
-    return res.status(500).json({
-      msg: "Some error occured !",
-    });
+    return res.json({ msg: "Request cancelled!", connectionId });
+  } catch (error: any) {
+    if (error?.message === "NOT_FOUND") {
+      return res.status(404).json({ msg: "Request not found or already processed!" });
+    }
+    return res.status(500).json({ msg: "Some error occured !" });
   }
 };
 
@@ -992,58 +1019,64 @@ export const connectionReqStatusController = async (
   const id = Number(req.userId);
 
   if (!id || isNaN(id)) {
-    return res.status(401).json({
-      msg: "Not authorized !",
-    });
+    return res.status(401).json({ msg: "Not authorized !" });
   }
 
   if (!connectionId || isNaN(connectionId)) {
-    return res.status(400).json({
-      msg: "Invalid connectionId",
-    });
+    return res.status(400).json({ msg: "Invalid connectionId" });
   }
 
   try {
-    const connectionReq = await client.connection.findFirst({
-      where: {
-        connectionId: connectionId,
-        receiverId: id,
-      },
-    });
-
-    if (!connectionReq) {
-      return res.status(404).json({
-        msg: "Connection req not found !",
+    const result = await client.$transaction(async (tx) => {
+      const connectionReq = await tx.connection.findFirst({
+        where: { connectionId, receiverId: id },
+        include: {
+          sender: {
+            select: { id: true, name: true, username: true, profilePicture: true },
+          },
+        },
       });
-    }
+
+      if (!connectionReq) {
+        throw new Error("NOT_FOUND");
+      }
+
+      if (actionType === "accept") {
+        const updated = await tx.connection.update({
+          where: { connectionId },
+          data: { status: "accepted" },
+          include: {
+            sender: {
+              select: { id: true, name: true, username: true, profilePicture: true },
+            },
+            receiver: {
+              select: { id: true, name: true, username: true, profilePicture: true },
+            },
+          },
+        });
+        return { connection: updated };
+      }
+
+      if (actionType === "reject") {
+        await tx.connection.update({
+          where: { connectionId },
+          data: { status: "rejected" },
+        });
+        return { connectionId };
+      }
+
+      throw new Error("INVALID_ACTION");
+    });
 
     if (actionType === "accept") {
-      await client.connection.update({
-        where: {
-          connectionId: connectionId,
-        },
-        data: {
-          status: "accepted",
-        },
-      });
-    } else if (actionType === "reject") {
-      await client.connection.update({
-        where: {
-          connectionId: connectionId,
-        },
-        data: {
-          status: "rejected",
-        },
-      });
+      return res.json({ msg: "Request accepted!", connection: (result as { connection: any }).connection });
     }
-
-    return res.json({
-      msg: "Status updated !",
-    });
-  } catch (error) {
-    return res.status(500).json({
-      msg: "Some error occured !",
-    });
+    return res.json({ msg: "Request rejected!" });
+  } catch (error: any) {
+    if (error?.message === "NOT_FOUND") {
+      return res.status(404).json({ msg: "Connection req not found !" });
+    }
+    return res.status(500).json({ msg: "Some error occured !" });
   }
 };
 

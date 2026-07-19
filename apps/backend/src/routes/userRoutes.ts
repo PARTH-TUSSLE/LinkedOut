@@ -1,5 +1,6 @@
 import { Router } from "express";
 import {
+  cancelRequestController,
   connectionReqStatusController,
   disconnectController,
   downloadProfileController,
@@ -119,6 +120,11 @@ userRouter.post(
   "/user/disconnect",
   authMiddleware,
   disconnectController
+);
+userRouter.post(
+  "/user/cancel_request",
+  authMiddleware,
+  cancelRequestController
 );
 userRouter.get(
   "/verify-token",
