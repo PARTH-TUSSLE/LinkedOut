@@ -1,11 +1,12 @@
 "use client";
 
 import Link from "next/link";
-import { Menu, Bell } from "lucide-react";
+import { Menu } from "lucide-react";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { toggleSidebar } from "@/store/slices/uiSlice";
 import { Avatar } from "@/components/ui/Avatar";
 import { UserMenu } from "./UserMenu";
+import { NotificationDropdown } from "@/components/notifications/NotificationDropdown";
 
 export function Navbar() {
   const dispatch = useAppDispatch();
@@ -27,9 +28,7 @@ export function Navbar() {
         </div>
 
         <div className="flex items-center gap-3">
-          <button className="rounded-lg p-2 text-text-secondary transition-colors hover:bg-bg">
-            <Bell size={20} />
-          </button>
+          <NotificationDropdown />
           {user && (
             <UserMenu
               trigger={
