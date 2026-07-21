@@ -1,79 +1,62 @@
 "use client";
 
-import { useCallback } from "react";
+import { useState } from "react";
 import { Check, X } from "lucide-react";
 import { Button } from "@/components/ui/Button";
-import { useAppDispatch, useAppSelector } from "@/store/hooks";
+import { useAppDispatch } from "@/store/hooks";
 import {
   acceptConnectionRequest,
   rejectConnectionRequest,
 } from "@/store/thunks/connectionsThunks";
-import {
-  optimisticRemoveReceivedRequest,
-} from "@/store/slices/connectionsSlice";
-import { addToast } from "@/store/slices/uiSlice";
 
 interface AcceptRejectButtonsProps {
   connectionId: number;
 }
 
-export function AcceptRejectButtons({
-  connectionId,
-}: AcceptRejectButtonsProps) {
+export function AcceptRejectButtons({ connectionId }: AcceptRejectButtonsProps) {
   const dispatch = useAppDispatch();
+  const [loading, setLoading] = useState<string | null>(null);
 
-  const senderId = useAppSelector(
-    (state) =>
-      state.connections.receivedRequests.find(
-        (r) => r.connectionId === connectionId
-      )?.senderId
-  );
-
-  const actionLoading = useAppSelector(
-    (state) => (senderId ? (state.connections.actionLoading[senderId] ?? null) : null)
-  );
-
-  const handleAccept = useCallback(async () => {
-    dispatch(optimisticRemoveReceivedRequest(connectionId));
+  const handleAccept = async () => {
+    setLoading("accept");
     try {
       await dispatch(acceptConnectionRequest(connectionId)).unwrap();
-      dispatch(addToast({ message: "Request accepted", type: "success" }));
     } catch {
-      dispatch(addToast({ message: "Failed to accept request", type: "error" }));
+      // handled by thunk
+    } finally {
+      setLoading(null);
     }
-  }, [dispatch, connectionId]);
+  };
 
-  const handleReject = useCallback(async () => {
-    dispatch(optimisticRemoveReceivedRequest(connectionId));
+  const handleReject = async () => {
+    setLoading("reject");
     try {
       await dispatch(rejectConnectionRequest(connectionId)).unwrap();
-      dispatch(addToast({ message: "Request declined", type: "info" }));
     } catch {
-      dispatch(addToast({ message: "Failed to decline request", type: "error" }));
+      // handled by thunk
+    } finally {
+      setLoading(null);
     }
-  }, [dispatch, connectionId]);
+  };
 
   return (
-    <div className="flex items-center gap-1">
+    <div className="flex gap-1.5">
       <Button
-        variant="ghost"
+        variant="secondary"
         size="sm"
         onClick={handleAccept}
-        loading={actionLoading === "accepting"}
-        disabled={actionLoading !== null}
-        className="text-secondary hover:text-secondary-hover"
+        loading={loading === "accept"}
       >
-        <Check size={16} />
+        <Check size={14} />
       </Button>
       <Button
         variant="ghost"
         size="sm"
         onClick={handleReject}
-        loading={actionLoading === "rejecting"}
-        disabled={actionLoading !== null}
-        className="text-danger hover:text-danger-hover"
+        loading={loading === "reject"}
+        className="text-text-tertiary hover:text-danger"
       >
-        <X size={16} />
+        <X size={14} />
       </Button>
     </div>
   );

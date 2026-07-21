@@ -1,6 +1,5 @@
 import { GraduationCap } from "lucide-react";
 import { Card } from "@/components/ui/Card";
-import { EmptyState } from "@/components/ui/EmptyState";
 import { formatYear } from "@/lib/utils";
 import type { Education } from "@/types";
 
@@ -9,34 +8,25 @@ interface ProfileEducationProps {
 }
 
 export function ProfileEducation({ education }: ProfileEducationProps) {
-  if (education.length === 0) return null;
+  if (!education || education.length === 0) return null;
 
   return (
-    <Card className="p-4">
-      <h2 className="mb-3 text-sm font-semibold text-text-primary">
-        Education
-      </h2>
-      <div className="space-y-3">
-        {education.map((edu, index) => (
-          <div key={edu.id || index} className="flex gap-3">
-            <div className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary-light">
-              <GraduationCap size={16} className="text-primary" />
+    <Card className="p-5">
+      <h3 className="text-label text-text-tertiary mb-4">Education</h3>
+      <div className="space-y-4">
+        {education.map((item, i) => (
+          <div key={item.id ?? i} className="flex gap-3">
+            <div className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-border bg-card-hover text-text-tertiary">
+              <GraduationCap size={15} />
             </div>
             <div>
-              <p className="text-sm font-medium text-text-primary">
-                {edu.school}
+              <p className="text-body-sm font-medium text-text-primary">
+                {item.degree} in {item.fieldOfStudy}
               </p>
-              {edu.degree && (
-                <p className="text-xs text-text-secondary">{edu.degree}</p>
-              )}
-              {edu.fieldOfStudy && (
-                <p className="text-xs text-text-muted">{edu.fieldOfStudy}</p>
-              )}
-              {(edu.startDate || edu.endDate) && (
-                <p className="mt-0.5 text-xs text-text-muted">
-                  {edu.startDate ? formatYear(edu.startDate) : ""}
-                  {edu.startDate && edu.endDate ? " – " : ""}
-                  {edu.endDate ? formatYear(edu.endDate) : ""}
+              <p className="text-body-sm text-text-secondary">{item.school}</p>
+              {(item.startDate || item.endDate) && (
+                <p className="text-caption text-text-tertiary">
+                  {item.startDate ? formatYear(item.startDate) : "?"} — {item.endDate ? formatYear(item.endDate) : "Present"}
                 </p>
               )}
             </div>

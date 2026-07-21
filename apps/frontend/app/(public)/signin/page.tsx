@@ -3,24 +3,22 @@ import { SignInForm } from "@/components/auth/SignInForm";
 
 export default function SignInPage() {
   return (
-    <div className="flex min-h-[calc(100vh-3.5rem)] items-center justify-center px-4">
+    <div className="flex min-h-[calc(100vh-3rem)] items-center justify-center px-4 py-12">
       <div className="w-full max-w-sm">
         <div className="mb-8 text-center">
-          <h1 className="text-2xl font-bold text-text-primary">
-            Welcome back
-          </h1>
-          <p className="mt-2 text-sm text-text-secondary">
+          <h1 className="text-h3 text-text-primary">Welcome back</h1>
+          <p className="mt-1.5 text-body-sm text-text-secondary">
             Sign in to your account
           </p>
         </div>
-        <div className="rounded-xl border border-border bg-surface p-6 shadow-sm">
+        <div className="rounded-xl border border-border bg-card p-6">
           <SignInForm />
         </div>
-        <p className="mt-6 text-center text-sm text-text-secondary">
+        <p className="mt-6 text-center text-body-sm text-text-secondary">
           Don&apos;t have an account?{" "}
           <Link
             href="/signup"
-            className="font-medium text-primary hover:text-primary-hover"
+            className="font-medium text-accent hover:text-accent-hover transition-colors"
           >
             Sign up
           </Link>

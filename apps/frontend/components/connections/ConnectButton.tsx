@@ -1,178 +1,100 @@
 "use client";
 
-import { useCallback } from "react";
-import { UserPlus, UserCheck, Clock, Check, X, LogOut, XCircle } from "lucide-react";
+import { useState } from "react";
+import { UserPlus, UserCheck, Clock } from "lucide-react";
 import { Button } from "@/components/ui/Button";
-import { useAppDispatch, useAppSelector } from "@/store/hooks";
+import { useAppDispatch } from "@/store/hooks";
 import {
   sendConnectionRequest,
-  acceptConnectionRequest,
-  rejectConnectionRequest,
   cancelConnectionRequest,
   disconnectConnection,
-  fetchReceivedRequests,
-  fetchConnections,
 } from "@/store/thunks/connectionsThunks";
-import {
-  optimisticAddSentRequest,
-  optimisticRemoveReceivedRequest,
-  optimisticRemoveConnection,
-} from "@/store/slices/connectionsSlice";
-import { addToast } from "@/store/slices/uiSlice";
 import { useConnectionStatus } from "@/hooks/useConnectionStatus";
-import { ConnectionStatus as CS } from "@/types";
+import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 
 interface ConnectButtonProps {
   userId: number;
-  onSuccess?: () => void;
+  size?: "sm" | "md";
 }
 
-export function ConnectButton({ userId, onSuccess }: ConnectButtonProps) {
+export function ConnectButton({ userId, size = "sm" }: ConnectButtonProps) {
   const dispatch = useAppDispatch();
-  const user = useAppSelector((state) => state.auth.user);
-  const { status, connectionId, actionLoading } = useConnectionStatus(userId);
+  const [showConfirm, setShowConfirm] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const statusInfo = useConnectionStatus(userId);
 
-  if (!user || user.id === userId) return null;
-
-  const isLoading = actionLoading !== null;
-
-  const handleConnect = useCallback(async () => {
-    dispatch(optimisticAddSentRequest({ receiverId: userId, name: "", username: "" }));
+  const handleSend = async () => {
+    setLoading(true);
     try {
       await dispatch(sendConnectionRequest(userId)).unwrap();
-      dispatch(addToast({ message: "Connection request sent!", type: "success" }));
-      onSuccess?.();
     } catch {
-      // Refs remain optimistic — extraReducers.sentRequest.rejected will clean up
-      onSuccess?.();
+      // handled by thunk
+    } finally {
+      setLoading(false);
     }
-  }, [dispatch, userId, onSuccess]);
+  };
 
-  const handleAccept = useCallback(async () => {
-    if (!connectionId) return;
-    dispatch(optimisticRemoveReceivedRequest(connectionId));
+  const handleCancel = async () => {
+    if (!statusInfo.connectionId) return;
+    setLoading(true);
     try {
-      await dispatch(acceptConnectionRequest(connectionId)).unwrap();
-      dispatch(addToast({ message: "Connection accepted!", type: "success" }));
-      onSuccess?.();
-    } catch (err: any) {
-      const received = await dispatch(fetchReceivedRequests()).unwrap();
-      onSuccess?.();
+      await dispatch(cancelConnectionRequest(statusInfo.connectionId)).unwrap();
+    } catch {
+      // handled by thunk
+    } finally {
+      setLoading(false);
     }
-  }, [dispatch, connectionId, onSuccess]);
+  };
 
-  const handleReject = useCallback(async () => {
-    if (!connectionId) return;
-    dispatch(optimisticRemoveReceivedRequest(connectionId));
+  const handleDisconnect = async () => {
+    setShowConfirm(false);
+    const connId = statusInfo.connectionId;
+    if (!connId) return;
+    setLoading(true);
     try {
-      await dispatch(rejectConnectionRequest(connectionId)).unwrap();
-      dispatch(addToast({ message: "Request declined", type: "info" }));
-      onSuccess?.();
-    } catch (err: any) {
-      const received = await dispatch(fetchReceivedRequests()).unwrap();
-      onSuccess?.();
+      await dispatch(disconnectConnection(connId)).unwrap();
+    } catch {
+      // handled by thunk
+    } finally {
+      setLoading(false);
     }
-  }, [dispatch, connectionId, onSuccess]);
+  };
 
-  const handleCancel = useCallback(async () => {
-    if (!connectionId) return;
-    try {
-      await dispatch(cancelConnectionRequest(connectionId)).unwrap();
-      dispatch(addToast({ message: "Request cancelled", type: "info" }));
-      onSuccess?.();
-    } catch (err: any) {
-      dispatch(addToast({ message: "Failed to cancel", type: "error" }));
-    }
-  }, [dispatch, connectionId, onSuccess]);
-
-  const handleDisconnect = useCallback(async () => {
-    if (!connectionId) return;
-    dispatch(optimisticRemoveConnection(connectionId));
-    try {
-      await dispatch(disconnectConnection(connectionId)).unwrap();
-      dispatch(addToast({ message: "Disconnected", type: "info" }));
-      onSuccess?.();
-    } catch (err: any) {
-      const conns = await dispatch(fetchConnections()).unwrap();
-      onSuccess?.();
-    }
-  }, [dispatch, connectionId, onSuccess]);
-
-  if (status === CS.CONNECTED) {
+  if (statusInfo.status === "connected") {
     return (
-      <div className="flex items-center gap-2">
-        <Button variant="outline" size="sm" disabled className="cursor-default">
-          <UserCheck size={16} />
+      <>
+        <Button variant="secondary" size={size} onClick={() => setShowConfirm(true)}>
+          <UserCheck size={14} />
           Connected
         </Button>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={handleDisconnect}
-          loading={actionLoading === "disconnecting"}
-          className="text-danger border-danger/30 hover:bg-danger/10"
-        >
-          <LogOut size={14} />
-          Disconnect
-        </Button>
-      </div>
+        <ConfirmDialog
+          open={showConfirm}
+          onClose={() => setShowConfirm(false)}
+          onConfirm={handleDisconnect}
+          title="Remove connection"
+          description="Are you sure you want to remove this connection?"
+          confirmLabel="Remove"
+        />
+      </>
     );
   }
 
-  if (status === CS.PENDING_SENT) {
+  if (statusInfo.status === "pending_sent") {
     return (
-      <div className="flex items-center gap-2">
-        <Button variant="outline" size="sm" disabled className="cursor-default">
-          <Clock size={16} />
-          Pending
-        </Button>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={handleCancel}
-          loading={actionLoading === "cancelling"}
-          className="text-danger border-danger/30 hover:bg-danger/10"
-        >
-          <XCircle size={14} />
-          Cancel
-        </Button>
-      </div>
+      <Button variant="secondary" size={size} onClick={handleCancel} loading={loading}>
+        <Clock size={14} />
+        Requested
+      </Button>
     );
   }
 
-  if (status === CS.PENDING_RECEIVED) {
-    return (
-      <div className="flex items-center gap-1">
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={handleAccept}
-          loading={actionLoading === "accepting"}
-          className="text-secondary hover:text-secondary-hover"
-        >
-          <Check size={16} />
-        </Button>
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={handleReject}
-          loading={actionLoading === "rejecting"}
-          className="text-danger hover:text-danger-hover"
-        >
-          <X size={16} />
-        </Button>
-      </div>
-    );
+  if (statusInfo.status === "pending_received") {
+    return <Button variant="secondary" size={size}><UserCheck size={14} />Respond</Button>;
   }
 
   return (
-    <Button
-      variant="outline"
-      size="sm"
-      onClick={handleConnect}
-      loading={isLoading}
-    >
-      <UserPlus size={16} />
+    <Button variant="secondary" size={size} onClick={handleSend} loading={loading}>
+      <UserPlus size={14} />
       Connect
     </Button>
   );

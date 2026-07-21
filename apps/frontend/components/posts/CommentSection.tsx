@@ -1,23 +1,11 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Send } from "lucide-react";
-import { CommentItem } from "./CommentItem";
-import { Skeleton } from "@/components/ui/Skeleton";
-import { EmptyState } from "@/components/ui/EmptyState";
+import { useAppSelector, useAppDispatch } from "@/store/hooks";
+import { addComment } from "@/store/thunks/postsThunks";
 import { Avatar } from "@/components/ui/Avatar";
-import { useAppDispatch, useAppSelector } from "@/store/hooks";
-import {
-  fetchComments,
-  addComment as addCommentThunk,
-} from "@/store/thunks/postsThunks";
-import {
-  setComments,
-  addComment,
-  updatePostCommentCount,
-} from "@/store/slices/postsSlice";
-import { addToast } from "@/store/slices/uiSlice";
-import type { Comment } from "@/types";
+import { Button } from "@/components/ui/Button";
 
 interface CommentSectionProps {
   postId: number;
@@ -26,105 +14,52 @@ interface CommentSectionProps {
 export function CommentSection({ postId }: CommentSectionProps) {
   const dispatch = useAppDispatch();
   const { user } = useAppSelector((state) => state.auth);
-  const comments = useAppSelector(
-    (state) => state.posts.comments[postId]
-  );
-  const [body, setBody] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
-  const [isSending, setIsSending] = useState(false);
-
-  useEffect(() => {
-    if (!comments) {
-      setIsLoading(true);
-      dispatch(fetchComments(postId))
-        .unwrap()
-        .then((result) => {
-          dispatch(
-            setComments({ postId, comments: result.comments })
-          );
-        })
-        .catch(() => {})
-        .finally(() => setIsLoading(false));
-    }
-  }, [dispatch, postId, comments]);
+  const [content, setContent] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleSubmit = async () => {
-    if (!body.trim()) return;
-    setIsSending(true);
+    if (!content.trim()) return;
+    setIsSubmitting(true);
     try {
-      const result = await dispatch(
-        addCommentThunk({ postId, commentBody: body.trim() })
-      ).unwrap();
-      dispatch(addComment({ postId, comment: result.comment }));
-      dispatch(updatePostCommentCount({ postId, delta: 1 }));
-      setBody("");
+      await dispatch(addComment({ postId, commentBody: content })).unwrap();
+      setContent("");
     } catch {
-      dispatch(addToast({ message: "Failed to add comment", type: "error" }));
+      // handled by thunk
     } finally {
-      setIsSending(false);
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      handleSubmit();
     }
   };
 
   return (
-    <div className="border-t border-border px-4 py-3">
-      <div className="mb-3 flex items-start gap-2">
-        <Avatar src={user?.profilePicture} alt="" size="sm" />
+    <div className="space-y-3">
+      <div className="flex gap-2">
+        <Avatar src={user?.profilePicture} alt={user?.name || "You"} size="sm" />
         <div className="flex flex-1 items-center gap-2">
           <input
-            value={body}
-            onChange={(e) => setBody(e.target.value)}
+            value={content}
+            onChange={(e) => setContent(e.target.value)}
+            onKeyDown={handleKeyDown}
             placeholder="Write a comment..."
-            className="h-9 flex-1 rounded-lg border border-border bg-bg px-3 text-sm text-text-primary placeholder:text-text-muted focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
-            onKeyDown={(e) => {
-              if (e.key === "Enter" && !e.shiftKey) {
-                e.preventDefault();
-                handleSubmit();
-              }
-            }}
+            className="flex-1 h-8 rounded-lg border border-border bg-card-hover px-3 text-body-sm text-text-primary placeholder:text-text-tertiary outline-none focus:border-accent/40 focus:ring-2 focus:ring-ring transition-all"
           />
-          <button
+          <Button
+            size="sm"
+            variant="ghost"
             onClick={handleSubmit}
-            disabled={!body.trim() || isSending}
-            className="rounded-lg p-1.5 text-primary transition-colors hover:bg-primary-light disabled:opacity-50"
+            disabled={!content.trim()}
+            loading={isSubmitting}
           >
-            <Send size={18} />
-          </button>
+            <Send size={14} />
+          </Button>
         </div>
       </div>
-
-      {isLoading ? (
-        <div className="space-y-3">
-          {[1, 2].map((i) => (
-            <div key={i} className="flex items-start gap-2">
-              <Skeleton className="h-8 w-8 rounded-full" />
-              <div className="space-y-1">
-                <Skeleton className="h-3 w-24" />
-                <Skeleton className="h-3 w-48" />
-              </div>
-            </div>
-          ))}
-        </div>
-      ) : comments && comments.length > 0 ? (
-        <div>
-          <p className="mb-2 text-xs font-medium text-text-secondary">
-            {comments.length} {comments.length === 1 ? "Comment" : "Comments"}
-          </p>
-          <div className="space-y-3">
-            {comments.map((comment) => (
-              <CommentItem
-                key={comment.commentId}
-                comment={comment}
-                postId={postId}
-              />
-            ))}
-          </div>
-        </div>
-      ) : (
-        <EmptyState
-          title="No comments"
-          description="Be the first to comment"
-        />
-      )}
     </div>
   );
 }

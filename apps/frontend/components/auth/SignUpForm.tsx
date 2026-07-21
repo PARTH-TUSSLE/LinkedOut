@@ -1,112 +1,108 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { useAppDispatch } from "@/store/hooks";
-import { registerUser } from "@/store/thunks/authThunks";
-import { setLoading } from "@/store/slices/authSlice";
-import { addToast } from "@/store/slices/uiSlice";
+import { Eye, EyeOff, UserPlus } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
+import { useAppDispatch } from "@/store/hooks";
+import { registerUser } from "@/store/thunks/authThunks";
+import { setCredentials } from "@/store/slices/authSlice";
+import { STORAGE_KEYS } from "@/config/constants";
 
-const schema = z
-  .object({
-    name: z.string().min(3, "Name must be at least 3 characters").max(50),
-    username: z.string().min(3, "Username must be at least 3 characters").max(50),
-    email: z.string().email("Invalid email address"),
-    password: z.string().min(6, "Password must be at least 6 characters"),
-    confirmPassword: z.string(),
-  })
-  .refine((data) => data.password === data.confirmPassword, {
-    message: "Passwords do not match",
-    path: ["confirmPassword"],
-  });
+const schema = z.object({
+  name: z.string().min(1, "Name is required"),
+  username: z.string().min(3, "Username must be at least 3 characters"),
+  email: z.string().email("Invalid email"),
+  password: z.string().min(6, "Password must be at least 6 characters"),
+});
 
 type FormData = z.infer<typeof schema>;
 
 export function SignUpForm() {
+  const router = useRouter();
   const dispatch = useAppDispatch();
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [error, setError] = useState("");
 
   const {
     register,
     handleSubmit,
-    formState: { errors },
+    formState: { errors, isSubmitting },
   } = useForm<FormData>({
     resolver: zodResolver(schema),
   });
 
   const onSubmit = async (data: FormData) => {
-    setIsSubmitting(true);
-    dispatch(setLoading(true));
-
+    setError("");
     try {
-      await dispatch(
-        registerUser({
-          name: data.name,
-          username: data.username,
-          email: data.email,
-          password: data.password,
-        })
-      ).unwrap();
-
-      window.location.href = "/dashboard";
-    } catch (error: any) {
-      dispatch(
-        addToast({
-          message: typeof error === "string" ? error : "Sign up failed",
-          type: "error",
-        })
-      );
-    } finally {
-      setIsSubmitting(false);
-      dispatch(setLoading(false));
+      const result = await dispatch(registerUser(data)).unwrap();
+      localStorage.setItem(STORAGE_KEYS.TOKEN, result.token);
+      localStorage.setItem(STORAGE_KEYS.USER, JSON.stringify(result.user));
+      dispatch(setCredentials({ user: result.user, token: result.token }));
+      router.push("/profile/edit");
+    } catch (err: any) {
+      setError(typeof err === "string" ? err : "Something went wrong");
     }
   };
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+      {error && (
+        <div className="rounded-lg border border-border-danger bg-danger-subtle px-3 py-2 text-body-sm text-danger">
+          {error}
+        </div>
+      )}
+
       <Input
-        id="name"
         label="Full name"
         placeholder="John Doe"
         error={errors.name?.message}
         {...register("name")}
       />
       <Input
-        id="username"
         label="Username"
         placeholder="johndoe"
         error={errors.username?.message}
         {...register("username")}
       />
       <Input
-        id="email"
         label="Email"
         type="email"
         placeholder="john@example.com"
         error={errors.email?.message}
         {...register("email")}
       />
-      <Input
-        id="password"
-        label="Password"
-        type="password"
-        placeholder="At least 6 characters"
-        error={errors.password?.message}
-        {...register("password")}
-      />
-      <Input
-        id="confirmPassword"
-        label="Confirm password"
-        type="password"
-        placeholder="Repeat your password"
-        error={errors.confirmPassword?.message}
-        {...register("confirmPassword")}
-      />
-      <Button type="submit" className="w-full" loading={isSubmitting}>
+
+      <div className="space-y-1.5">
+        <label className="block text-body-sm font-medium text-text-secondary">
+          Password
+        </label>
+        <div className="relative">
+          <input
+            type={showPassword ? "text" : "password"}
+            placeholder="Create a password"
+            className="h-9 w-full rounded-lg border border-border bg-card pl-3 pr-9 text-body-sm text-text-primary placeholder:text-text-tertiary transition-all duration-150 focus:border-accent/40 focus:outline-none focus:ring-2 focus:ring-ring hover:border-border-hover"
+            {...register("password")}
+          />
+          <button
+            type="button"
+            onClick={() => setShowPassword(!showPassword)}
+            className="absolute right-2.5 top-1/2 -translate-y-1/2 text-text-tertiary hover:text-text-secondary transition-colors"
+          >
+            {showPassword ? <EyeOff size={15} /> : <Eye size={15} />}
+          </button>
+        </div>
+        {errors.password?.message && (
+          <p className="text-caption text-danger">{errors.password.message}</p>
+        )}
+      </div>
+
+      <Button type="submit" loading={isSubmitting} className="w-full" size="lg">
+        <UserPlus size={16} />
         Create account
       </Button>
     </form>

@@ -1,5 +1,6 @@
 import { Briefcase } from "lucide-react";
 import { Card } from "@/components/ui/Card";
+import { formatYear } from "@/lib/utils";
 import type { WorkHistory } from "@/types";
 
 interface ProfileWorkHistoryProps {
@@ -7,39 +8,28 @@ interface ProfileWorkHistoryProps {
 }
 
 export function ProfileWorkHistory({ workHistory }: ProfileWorkHistoryProps) {
-  if (workHistory.length === 0) return null;
+  if (!workHistory || workHistory.length === 0) return null;
 
   return (
-    <Card className="p-4">
-      <h2 className="mb-3 text-sm font-semibold text-text-primary">
-        Experience
-      </h2>
+    <Card className="p-5">
+      <h3 className="text-label text-text-tertiary mb-4">Work History</h3>
       <div className="space-y-4">
-        {workHistory.map((work, index) => (
-          <div key={work.id || index} className="flex gap-3">
-            <div className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary-light">
-              <Briefcase size={16} className="text-primary" />
+        {workHistory.map((item, i) => (
+          <div key={item.id ?? i} className="flex gap-3">
+            <div className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-border bg-card-hover text-text-tertiary">
+              <Briefcase size={15} />
             </div>
             <div>
-              <p className="text-sm font-medium text-text-primary">
-                {work.position}
-              </p>
-              <p className="text-xs text-text-secondary">{work.company}</p>
-              {work.location && (
-                <p className="text-xs text-text-muted">{work.location}</p>
-              )}
-              {(work.startDate || work.endDate || work.years) && (
-                <p className="mt-0.5 text-xs text-text-muted">
-                  {work.startDate || ""}
-                  {work.startDate && work.endDate ? " – " : ""}
-                  {work.endDate || ""}
-                  {work.years && (work.startDate || work.endDate) ? " · " : ""}
-                  {work.years || ""}
+              <p className="text-body-sm font-medium text-text-primary">{item.position}</p>
+              <p className="text-body-sm text-text-secondary">{item.company}</p>
+              {(item.startDate || item.endDate || item.years) && (
+                <p className="text-caption text-text-tertiary">
+                  {item.years || `${item.startDate ? formatYear(item.startDate) : "?"} — ${item.endDate ? formatYear(item.endDate) : "Present"}`}
                 </p>
               )}
-              {work.description && (
-                <p className="mt-1 text-xs leading-relaxed text-text-secondary">
-                  {work.description}
+              {item.description && (
+                <p className="mt-1 text-body-sm text-text-secondary leading-relaxed">
+                  {item.description}
                 </p>
               )}
             </div>

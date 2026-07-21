@@ -1,58 +1,36 @@
 "use client";
 
-import { Trash2 } from "lucide-react";
+import Link from "next/link";
 import { Avatar } from "@/components/ui/Avatar";
-import { useAppDispatch, useAppSelector } from "@/store/hooks";
-import { deleteComment } from "@/store/thunks/postsThunks";
-import { removeComment, updatePostCommentCount } from "@/store/slices/postsSlice";
-import { addToast } from "@/store/slices/uiSlice";
+import { formatDate } from "@/lib/utils";
 import type { Comment } from "@/types";
 
 interface CommentItemProps {
   comment: Comment;
-  postId: number;
 }
 
-export function CommentItem({ comment, postId }: CommentItemProps) {
-  const dispatch = useAppDispatch();
-  const { user } = useAppSelector((state) => state.auth);
-  const isOwner = user?.id === comment.creatorId;
-
-  const handleDelete = async () => {
-    try {
-      await dispatch(
-        deleteComment({ postId, commentId: comment.commentId })
-      ).unwrap();
-      dispatch(removeComment({ postId, commentId: comment.commentId }));
-      dispatch(updatePostCommentCount({ postId, delta: -1 }));
-    } catch {
-      dispatch(addToast({ message: "Failed to delete comment", type: "error" }));
-    }
-  };
-
+export function CommentItem({ comment }: CommentItemProps) {
   return (
-    <div className="flex items-start gap-2">
-      <Avatar
-        src={comment.creator?.profilePicture}
-        alt={comment.creator?.name || "User"}
-        size="sm"
-      />
-      <div className="flex-1">
-        <div className="rounded-lg bg-bg p-2">
-          <p className="text-xs font-medium text-text-primary">
+    <div className="flex gap-2">
+      <Link href={`/profile/${comment.creator?.id}`}>
+        <Avatar
+          src={comment.creator?.profilePicture}
+          alt={comment.creator?.name || "User"}
+          size="sm"
+        />
+      </Link>
+      <div className="flex-1 min-w-0 rounded-lg bg-card-hover px-3 py-2">
+        <div className="flex items-center gap-2">
+          <Link
+            href={`/profile/${comment.creator?.id}`}
+            className="text-body-sm font-medium text-text-primary hover:text-accent transition-colors"
+          >
             {comment.creator?.name || "Unknown"}
-          </p>
-          <p className="text-xs text-text-secondary">{comment.body}</p>
+          </Link>
+          <span className="text-caption text-text-tertiary">now</span>
         </div>
+        <p className="text-body-sm text-text-secondary mt-0.5">{comment.body}</p>
       </div>
-      {isOwner && (
-        <button
-          onClick={handleDelete}
-          className="mt-1 rounded p-0.5 text-text-muted transition-colors hover:text-danger"
-        >
-          <Trash2 size={12} />
-        </button>
-      )}
     </div>
   );
 }

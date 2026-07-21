@@ -6,14 +6,14 @@ import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 
 interface ModalProps {
-  isOpen: boolean;
+  open: boolean;
   onClose: () => void;
   title?: string;
   children: React.ReactNode;
   className?: string;
 }
 
-export function Modal({ isOpen, onClose, title, children, className }: ModalProps) {
+export function Modal({ open, onClose, title, children, className }: ModalProps) {
   const handleEscape = useCallback(
     (e: KeyboardEvent) => {
       if (e.key === "Escape") onClose();
@@ -22,7 +22,7 @@ export function Modal({ isOpen, onClose, title, children, className }: ModalProp
   );
 
   useEffect(() => {
-    if (isOpen) {
+    if (open) {
       document.addEventListener("keydown", handleEscape);
       document.body.style.overflow = "hidden";
     }
@@ -30,41 +30,42 @@ export function Modal({ isOpen, onClose, title, children, className }: ModalProp
       document.removeEventListener("keydown", handleEscape);
       document.body.style.overflow = "";
     };
-  }, [isOpen, handleEscape]);
+  }, [open, handleEscape]);
 
   return (
     <AnimatePresence>
-      {isOpen && (
+      {open && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-overlay"
+            transition={{ duration: 0.15 }}
+            className="absolute inset-0 bg-black/40"
             onClick={onClose}
           />
           <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.95 }}
-            transition={{ duration: 0.15 }}
+            initial={{ opacity: 0, scale: 0.96, y: 8 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.96, y: 8 }}
+            transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
             className={cn(
-              "relative w-full max-w-lg rounded-xl bg-surface shadow-xl",
+              "relative w-full max-w-lg rounded-xl border border-border bg-card p-6 shadow-xl",
               className
             )}
           >
             {title && (
-              <div className="flex items-center justify-between border-b border-border px-6 py-4">
-                <h2 className="text-lg font-semibold text-text-primary">{title}</h2>
+              <div className="mb-4 flex items-center justify-between">
+                <h2 className="text-h4 text-text-primary">{title}</h2>
                 <button
                   onClick={onClose}
-                  className="rounded-lg p-1 text-text-muted transition-colors hover:bg-bg hover:text-text-primary"
+                  className="rounded-lg p-1.5 text-text-tertiary hover:text-text-primary hover:bg-card-hover transition-colors"
                 >
-                  <X size={20} />
+                  <X size={16} />
                 </button>
               </div>
             )}
-            <div className={cn(!title && "p-6")}>{children}</div>
+            {children}
           </motion.div>
         </div>
       )}

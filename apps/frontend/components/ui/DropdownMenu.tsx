@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 
 interface DropdownItem {
@@ -14,66 +13,53 @@ interface DropdownItem {
 interface DropdownMenuProps {
   trigger: React.ReactNode;
   items: DropdownItem[];
-  align?: "left" | "right";
-  className?: string;
+  align?: "start" | "end";
 }
 
-export function DropdownMenu({
-  trigger,
-  items,
-  align = "right",
-  className,
-}: DropdownMenuProps) {
-  const [isOpen, setIsOpen] = useState(false);
+export function DropdownMenu({ trigger, items, align = "end" }: DropdownMenuProps) {
+  const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    function handleClickOutside(event: MouseEvent) {
-      if (ref.current && !ref.current.contains(event.target as Node)) {
-        setIsOpen(false);
+    function handleClickOutside(e: MouseEvent) {
+      if (ref.current && !ref.current.contains(e.target as Node)) {
+        setOpen(false);
       }
     }
-    document.addEventListener("mousedown", handleClickOutside);
+    if (open) document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
+  }, [open]);
 
   return (
     <div ref={ref} className="relative inline-block">
-      <div onClick={() => setIsOpen(!isOpen)}>{trigger}</div>
-      <AnimatePresence>
-        {isOpen && (
-          <motion.div
-            initial={{ opacity: 0, scale: 0.95, y: -4 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.95, y: -4 }}
-            transition={{ duration: 0.12 }}
-            className={cn(
-              "absolute top-full z-50 mt-1 min-w-[180px] rounded-lg border border-border bg-surface py-1 shadow-lg",
-              align === "right" ? "right-0" : "left-0",
-              className
-            )}
-          >
-            {items.map((item, index) => (
-              <button
-                key={index}
-                onClick={() => {
-                  item.onClick();
-                  setIsOpen(false);
-                }}
-                className={cn(
-                  "flex w-full items-center gap-2 px-3 py-2 text-left text-sm transition-colors",
-                  item.danger
-                    ? "text-danger hover:bg-danger/5"
-                    : "text-text-primary hover:bg-bg"
-                )}
-              >
-                {item.icon && <span className="h-4 w-4">{item.icon}</span>}
-                {item.label}
-              </button>
-            ))}
-          </motion.div>
-        )}
-      </AnimatePresence>
+      <div onClick={() => setOpen(!open)}>{trigger}</div>
+      {open && (
+        <div
+          className={cn(
+            "absolute top-full mt-1 z-50 min-w-[160px] rounded-lg border border-border bg-card py-1 shadow-lg",
+            align === "end" ? "right-0" : "left-0"
+          )}
+        >
+          {items.map((item, i) => (
+            <button
+              key={i}
+              onClick={() => {
+                item.onClick();
+                setOpen(false);
+              }}
+              className={cn(
+                "flex w-full items-center gap-2 px-3 py-1.5 text-body-sm transition-colors",
+                item.danger
+                  ? "text-danger hover:bg-danger-subtle"
+                  : "text-text-secondary hover:bg-card-hover hover:text-text-primary"
+              )}
+            >
+              {item.icon && <span className="shrink-0">{item.icon}</span>}
+              {item.label}
+            </button>
+          ))}
+        </div>
+      )}
     </div>
   );
 }

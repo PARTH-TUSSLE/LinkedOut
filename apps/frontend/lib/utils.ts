@@ -1,30 +1,33 @@
-import { clsx, type ClassValue } from "clsx";
-import { twMerge } from "tailwind-merge";
-import { API_BASE_URL } from "@/config/constants";
+import { clsx, type ClassValue } from "clsx"
+import { twMerge } from "tailwind-merge"
 
 export function cn(...inputs: ClassValue[]) {
-  return twMerge(clsx(inputs));
+  return twMerge(clsx(inputs))
 }
 
-export function formatDate(date: string | Date) {
-  return new Intl.DateTimeFormat("en-US", {
+export function formatDate(dateStr: string | Date): string {
+  const date = new Date(dateStr);
+  const now = new Date();
+  const diff = now.getTime() - date.getTime();
+  const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+
+  if (days === 0) return "Today";
+  if (days === 1) return "Yesterday";
+  if (days < 7) return `${days} days ago`;
+  if (days < 30) return `${Math.floor(days / 7)}w ago`;
+
+  return date.toLocaleDateString("en-US", {
     month: "short",
     day: "numeric",
-    year: "numeric",
-  }).format(new Date(date));
+    year: date.getFullYear() !== now.getFullYear() ? "numeric" : undefined,
+  });
 }
 
-export function formatYear(date: string | Date | null | undefined) {
-  if (!date) return "";
-  return new Date(date).getFullYear().toString();
+export function formatYear(dateStr: string | Date): string {
+  return new Date(dateStr).getFullYear().toString();
 }
 
-export function truncate(str: string, length: number) {
-  if (str.length <= length) return str;
-  return str.slice(0, length) + "...";
-}
-
-export function getFileUrl(filename: string | null | undefined) {
-  if (!filename || filename === "default.jpeg") return null;
-  return `${API_BASE_URL.replace("/api/v1", "")}/${filename}`;
+export function getFileUrl(filename: string | null | undefined): string | null {
+  if (!filename || filename === "default.jpeg" || filename === "") return null;
+  return `http://localhost:8080/${filename}`;
 }

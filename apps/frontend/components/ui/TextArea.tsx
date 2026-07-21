@@ -3,8 +3,7 @@
 import { forwardRef } from "react";
 import { cn } from "@/lib/utils";
 
-interface TextAreaProps
-  extends React.TextareaHTMLAttributes<HTMLTextAreaElement> {
+interface TextAreaProps extends React.TextareaHTMLAttributes<HTMLTextAreaElement> {
   label?: string;
   error?: string;
 }
@@ -16,7 +15,7 @@ const TextArea = forwardRef<HTMLTextAreaElement, TextAreaProps>(
         {label && (
           <label
             htmlFor={id}
-            className="block text-sm font-medium text-text-primary"
+            className="block text-body-sm font-medium text-text-secondary"
           >
             {label}
           </label>
@@ -25,18 +24,17 @@ const TextArea = forwardRef<HTMLTextAreaElement, TextAreaProps>(
           ref={ref}
           id={id}
           className={cn(
-            "w-full rounded-lg border bg-white px-3 py-2 text-sm text-text-primary placeholder:text-text-muted transition-colors duration-200",
-            "focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20",
+            "w-full rounded-lg border bg-card px-3 py-2 text-body-sm text-text-primary placeholder:text-text-tertiary transition-all duration-150 resize-none",
+            "focus:border-accent/40 focus:outline-none focus:ring-2 focus:ring-ring",
             error
-              ? "border-danger focus:border-danger focus:ring-danger/20"
-              : "border-border",
-            "resize-none",
+              ? "border-danger/60 focus:border-danger/60 focus:ring-danger/20"
+              : "border-border hover:border-border-hover",
             className
           )}
           {...props}
         />
         {error && (
-          <p className="text-xs text-danger">{error}</p>
+          <p className="text-caption text-danger">{error}</p>
         )}
       </div>
     );

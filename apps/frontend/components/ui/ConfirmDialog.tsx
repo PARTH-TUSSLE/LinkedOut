@@ -4,35 +4,35 @@ import { Modal } from "./Modal";
 import { Button } from "./Button";
 
 interface ConfirmDialogProps {
-  isOpen: boolean;
+  open: boolean;
   onClose: () => void;
   onConfirm: () => void;
   title: string;
-  message: string;
+  description: string;
   confirmLabel?: string;
   variant?: "danger" | "primary";
   loading?: boolean;
 }
 
 export function ConfirmDialog({
-  isOpen,
+  open,
   onClose,
   onConfirm,
   title,
-  message,
+  description,
   confirmLabel = "Confirm",
   variant = "danger",
   loading,
 }: ConfirmDialogProps) {
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title={title}>
-      <p className="text-sm text-text-secondary">{message}</p>
-      <div className="mt-6 flex justify-end gap-3">
-        <Button variant="outline" size="sm" onClick={onClose} disabled={loading}>
+    <Modal open={open} onClose={onClose} title={title}>
+      <p className="text-body-sm text-text-secondary">{description}</p>
+      <div className="mt-6 flex justify-end gap-2">
+        <Button variant="secondary" size="sm" onClick={onClose}>
           Cancel
         </Button>
         <Button
-          variant={variant}
+          variant={variant === "danger" ? "danger" : "primary"}
           size="sm"
           onClick={onConfirm}
           loading={loading}
