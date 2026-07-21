@@ -35,7 +35,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
           return;
         }
       } catch {
-        // corrupt — fall through to redirect
+        // fall through to redirect
       }
     }
 
@@ -45,7 +45,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
   if (!isAuthenticated) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-bg">
-        <Spinner size={24} />
+        <Spinner />
       </div>
     );
   }
@@ -53,7 +53,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
   return (
     <div className="flex h-screen overflow-hidden bg-bg">
       <Sidebar />
-      <div className="flex flex-1 flex-col lg:pl-60">
+      <div className="flex flex-1 flex-col lg:pl-56">
         <Navbar />
         <main className="flex-1 overflow-y-auto pb-16 scrollbar-hide lg:pb-0">
           {children}

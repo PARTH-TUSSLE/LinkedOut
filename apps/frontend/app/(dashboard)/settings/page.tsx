@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
 import { useForm } from "react-hook-form";
+import { motion } from "framer-motion";
 import { Save } from "lucide-react";
 import { Input } from "@/components/ui/Input";
 import { Button } from "@/components/ui/Button";
@@ -55,15 +55,20 @@ export default function SettingsPage() {
   };
 
   return (
-    <div className="mx-auto max-w-2xl p-4">
+    <motion.div
+      initial={{ opacity: 0, y: 4 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
+      className="mx-auto max-w-2xl p-4 sm:p-6"
+    >
       <div className="mb-6">
-        <h1 className="text-xl font-bold text-text-primary">Settings</h1>
-        <p className="text-sm text-text-secondary">
+        <h1 className="text-h3 text-text-primary">Settings</h1>
+        <p className="text-body-sm text-text-secondary">
           Manage your account settings
         </p>
       </div>
 
-      <Card className="p-6">
+      <Card className="p-5">
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <Input
             label="Username"
@@ -80,12 +85,12 @@ export default function SettingsPage() {
           />
           <div className="flex justify-end pt-2">
             <Button type="submit" loading={isSubmitting}>
-              <Save size={16} />
+              <Save size={15} />
               Save changes
             </Button>
           </div>
         </form>
       </Card>
-    </div>
+    </motion.div>
   );
 }

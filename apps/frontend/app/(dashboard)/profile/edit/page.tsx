@@ -1,37 +1,33 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
-import { ArrowLeft, Loader2 } from "lucide-react";
+import { useEffect } from "react";
+import { motion } from "framer-motion";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { fetchMyProfile } from "@/store/thunks/profileThunks";
-import { setProfile } from "@/store/slices/profileSlice";
+import { setProfile, setLoading } from "@/store/slices/profileSlice";
 import { ProfileEditForm } from "@/components/profile/ProfileEditForm";
-import { Button } from "@/components/ui/Button";
+import { Spinner } from "@/components/ui/Spinner";
 import { ErrorState } from "@/components/ui/ErrorState";
 
 export default function ProfileEditPage() {
-  const router = useRouter();
   const dispatch = useAppDispatch();
-  const { profile } = useAppSelector((state) => state.profile);
-  const [loading, setLoading] = useState(true);
+  const { profile, isLoading } = useAppSelector((state) => state.profile);
 
   useEffect(() => {
-    if (!profile) {
-      dispatch(fetchMyProfile())
-        .unwrap()
-        .then((result) => dispatch(setProfile(result.profile)))
-        .catch(() => {})
-        .finally(() => setLoading(false));
-    } else {
-      setLoading(false);
-    }
-  }, [dispatch, profile]);
+    dispatch(setLoading(true));
+    dispatch(fetchMyProfile())
+      .unwrap()
+      .then((result) => {
+        dispatch(setProfile(result.profile));
+      })
+      .catch(() => {})
+      .finally(() => dispatch(setLoading(false)));
+  }, [dispatch]);
 
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="flex items-center justify-center py-20">
-        <Loader2 className="h-6 w-6 animate-spin text-primary" />
+        <Spinner />
       </div>
     );
   }
@@ -45,27 +41,17 @@ export default function ProfileEditPage() {
   }
 
   return (
-    <div className="mx-auto max-w-2xl p-4">
+    <motion.div
+      initial={{ opacity: 0, y: 4 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
+      className="mx-auto max-w-2xl p-4 sm:p-6"
+    >
       <div className="mb-6">
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => router.push("/profile")}
-        >
-          <ArrowLeft size={16} />
-          Back to profile
-        </Button>
-        <h1 className="mt-2 text-xl font-bold text-text-primary">
-          Edit profile
-        </h1>
+        <h1 className="text-h3 text-text-primary">Edit Profile</h1>
+        <p className="text-body-sm text-text-secondary">Update your professional information</p>
       </div>
-
-      <div className="rounded-xl border border-border bg-surface p-6 shadow-sm">
-        <ProfileEditForm
-          profile={profile}
-          onSuccess={() => router.push("/profile")}
-        />
-      </div>
-    </div>
+      <ProfileEditForm profile={profile} />
+    </motion.div>
   );
 }

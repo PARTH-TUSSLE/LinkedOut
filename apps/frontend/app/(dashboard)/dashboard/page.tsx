@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
+import { motion } from "framer-motion";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { fetchPosts } from "@/store/thunks/postsThunks";
 import { setPosts, setPostsLoading } from "@/store/slices/postsSlice";
@@ -27,13 +28,22 @@ export default function DashboardPage() {
   }, [dispatch]);
 
   return (
-    <div className="mx-auto max-w-2xl space-y-4 p-4">
+    <motion.div
+      initial={{ opacity: 0, y: 4 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
+      className="mx-auto max-w-2xl space-y-4 p-4 sm:p-6"
+    >
+      <div className="mb-6">
+        <h1 className="text-h3 text-text-primary">Feed</h1>
+        <p className="text-body-sm text-text-secondary">Latest updates from your network</p>
+      </div>
       <CreatePostForm />
       <PostList
         posts={posts}
         isLoading={isLoading}
         onRetry={loadPosts}
       />
-    </div>
+    </motion.div>
   );
 }

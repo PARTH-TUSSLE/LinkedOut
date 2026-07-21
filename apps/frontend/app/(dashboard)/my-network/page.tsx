@@ -2,7 +2,8 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { Inbox, Send, UserCheck, Loader2 } from "lucide-react";
+import { motion } from "framer-motion";
+import { Inbox, Send, UserCheck } from "lucide-react";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import {
   fetchSentRequests,
@@ -18,6 +19,7 @@ import {
 import { ConnectionRequestCard } from "@/components/connections/ConnectionRequestCard";
 import { Avatar } from "@/components/ui/Avatar";
 import { Card } from "@/components/ui/Card";
+import { Spinner } from "@/components/ui/Spinner";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { cn } from "@/lib/utils";
 
@@ -49,69 +51,61 @@ export default function MyNetworkPage() {
     loadRequests();
   }, [dispatch]);
 
+  const tabs: { id: Tab; label: string; icon: any; count: number }[] = [
+    { id: "received", label: "Received", icon: Inbox, count: receivedRequests.length },
+    { id: "sent", label: "Sent", icon: Send, count: sentRequests.length },
+    { id: "connections", label: "Connections", icon: UserCheck, count: connections.length },
+  ];
+
   return (
-    <div className="mx-auto max-w-2xl p-4">
+    <motion.div
+      initial={{ opacity: 0, y: 4 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
+      className="mx-auto max-w-2xl p-4 sm:p-6"
+    >
       <div className="mb-6">
-        <h1 className="text-xl font-bold text-text-primary">My Network</h1>
-        <p className="text-sm text-text-secondary">
-          Manage your connections
-        </p>
+        <h1 className="text-h3 text-text-primary">My Network</h1>
+        <p className="text-body-sm text-text-secondary">Manage your connections</p>
       </div>
 
-      <div className="mb-4 flex items-center gap-1 rounded-lg bg-bg p-1">
-        <button
-          onClick={() => setTab("received")}
-          className={cn(
-            "flex flex-1 items-center justify-center gap-2 rounded-md px-3 py-2 text-sm font-medium transition-colors",
-            tab === "received"
-              ? "bg-surface text-text-primary shadow-sm"
-              : "text-text-secondary hover:text-text-primary"
-          )}
-        >
-          <Inbox size={16} />
-          Received ({receivedRequests.length})
-        </button>
-        <button
-          onClick={() => setTab("sent")}
-          className={cn(
-            "flex flex-1 items-center justify-center gap-2 rounded-md px-3 py-2 text-sm font-medium transition-colors",
-            tab === "sent"
-              ? "bg-surface text-text-primary shadow-sm"
-              : "text-text-secondary hover:text-text-primary"
-          )}
-        >
-          <Send size={16} />
-          Sent ({sentRequests.length})
-        </button>
-        <button
-          onClick={() => setTab("connections")}
-          className={cn(
-            "flex flex-1 items-center justify-center gap-2 rounded-md px-3 py-2 text-sm font-medium transition-colors",
-            tab === "connections"
-              ? "bg-surface text-text-primary shadow-sm"
-              : "text-text-secondary hover:text-text-primary"
-          )}
-        >
-          <UserCheck size={16} />
-          Connections ({connections.length})
-        </button>
+      <div className="mb-4 flex items-center gap-1 rounded-lg border border-border bg-card-hover p-0.5">
+        {tabs.map((t) => (
+          <button
+            key={t.id}
+            onClick={() => setTab(t.id)}
+            className={cn(
+              "flex flex-1 items-center justify-center gap-1.5 rounded-md px-3 py-1.5 text-body-sm font-medium transition-all duration-150",
+              tab === t.id
+                ? "bg-card text-text-primary shadow-xs"
+                : "text-text-tertiary hover:text-text-secondary"
+            )}
+          >
+            <t.icon size={14} />
+            {t.label}
+            <span className="text-caption">({t.count})</span>
+          </button>
+        ))}
       </div>
 
       {isLoading ? (
         <div className="flex items-center justify-center py-12">
-          <Loader2 className="h-6 w-6 animate-spin text-primary" />
+          <Spinner />
         </div>
       ) : tab === "connections" ? (
         connections.length === 0 ? (
           <EmptyState
-            icon={UserCheck}
+            icon={<UserCheck size={20} />}
             title="No connections yet"
             description="Connect with other users to grow your network."
           />
         ) : (
           <div className="space-y-2">
             {connections.map((conn) => (
-              <Card key={conn.connectionId} className="flex items-center justify-between p-3">
+              <Card
+                key={conn.connectionId}
+                className="flex items-center justify-between p-3 transition-all duration-150 hover:border-border-hover"
+              >
                 <Link
                   href={`/profile/${conn.user.id}`}
                   className="flex items-center gap-3"
@@ -122,10 +116,10 @@ export default function MyNetworkPage() {
                     size="md"
                   />
                   <div>
-                    <p className="text-sm font-medium text-text-primary hover:text-primary">
+                    <p className="text-body-sm font-medium text-text-primary hover:text-accent transition-colors">
                       {conn.user.name}
                     </p>
-                    <p className="text-xs text-text-muted">
+                    <p className="text-caption text-text-tertiary">
                       @{conn.user.username}
                     </p>
                   </div>
@@ -138,13 +132,13 @@ export default function MyNetworkPage() {
         <>
           {tab === "received" && receivedRequests.length === 0 ? (
             <EmptyState
-              icon={Inbox}
+              icon={<Inbox size={20} />}
               title="No received requests"
               description="You haven't received any connection requests yet."
             />
           ) : tab === "sent" && sentRequests.length === 0 ? (
             <EmptyState
-              icon={Send}
+              icon={<Send size={20} />}
               title="No sent requests"
               description="You haven't sent any connection requests yet."
             />
@@ -163,6 +157,6 @@ export default function MyNetworkPage() {
           )}
         </>
       )}
-    </div>
+    </motion.div>
   );
 }

@@ -2,6 +2,7 @@
 
 import { useEffect } from "react";
 import { Users } from "lucide-react";
+import { motion } from "framer-motion";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import {
   fetchAllUsers,
@@ -21,7 +22,6 @@ import { Card } from "@/components/ui/Card";
 import { ConnectButton } from "@/components/connections/ConnectButton";
 import { Spinner } from "@/components/ui/Spinner";
 import { EmptyState } from "@/components/ui/EmptyState";
-import { ErrorState } from "@/components/ui/ErrorState";
 import Link from "next/link";
 
 export default function NetworkPage() {
@@ -58,61 +58,77 @@ export default function NetworkPage() {
   );
 
   return (
-    <div className="mx-auto max-w-2xl p-4">
+    <motion.div
+      initial={{ opacity: 0, y: 4 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
+      className="mx-auto max-w-4xl p-4 sm:p-6"
+    >
       <div className="mb-6">
-        <h1 className="text-xl font-bold text-text-primary">Network</h1>
-        <p className="text-sm text-text-secondary">
-          Discover and connect with other professionals
+        <h1 className="text-h3 text-text-primary">Discover</h1>
+        <p className="text-body-sm text-text-secondary">
+          Find and connect with other professionals
         </p>
       </div>
 
       {isLoading ? (
         <div className="flex items-center justify-center py-12">
-          <Spinner size={24} />
+          <Spinner />
         </div>
       ) : filteredUsers.length === 0 ? (
         <EmptyState
-          icon={Users}
+          icon={<Users size={20} />}
           title="No users found"
           description="There are no other users to connect with yet."
         />
       ) : (
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-          {filteredUsers.map((profile) => (
-            <Card key={profile.id} className="p-4">
-              <div className="flex flex-col items-center text-center">
-                <Link href={`/profile/${profile.userId}`}>
-                  <Avatar
-                    src={profile.user?.profilePicture}
-                    alt={profile.user?.name || "User"}
-                    size="lg"
-                  />
-                </Link>
-                <Link
-                  href={`/profile/${profile.userId}`}
-                  className="mt-3 text-sm font-medium text-text-primary hover:text-primary"
-                >
-                  {profile.user?.name || "Unknown"}
-                </Link>
-                <p className="text-xs text-text-muted">
-                  @{profile.user?.username}
-                </p>
-                {profile.occupationStatus && (
-                  <p className="mt-1 text-xs text-text-secondary">
-                    {profile.occupationStatus}
-                  </p>
-                )}
-                {profile.location && (
-                  <p className="text-xs text-text-muted">{profile.location}</p>
-                )}
-                <div className="mt-3">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {filteredUsers.map((profile, i) => (
+            <motion.div
+              key={profile.id}
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: i * 0.03, ease: [0.16, 1, 0.3, 1] }}
+            >
+              <Card className="flex flex-col p-5 text-center transition-all duration-200 hover:border-border-hover">
+                <div className="flex-1">
+                  <Link href={`/profile/${profile.userId}`}>
+                    <Avatar
+                      src={profile.user?.profilePicture}
+                      alt={profile.user?.name || "User"}
+                      size="lg"
+                      className="mx-auto ring-2 ring-border"
+                    />
+                  </Link>
+                  <Link
+                    href={`/profile/${profile.userId}`}
+                    className="mt-3 block text-body-sm font-medium text-text-primary hover:text-accent transition-colors"
+                  >
+                    {profile.user?.name || "Unknown"}
+                  </Link>
+                  <Link
+                    href={`/profile/${profile.userId}`}
+                    className="text-caption text-text-tertiary hover:text-accent transition-colors inline-block"
+                  >
+                    @{profile.user?.username}
+                  </Link>
+                  {profile.occupationStatus && (
+                    <p className="mt-1 text-caption text-text-secondary">
+                      {profile.occupationStatus}
+                    </p>
+                  )}
+                  {profile.location && (
+                    <p className="text-caption text-text-tertiary">{profile.location}</p>
+                  )}
+                </div>
+                <div className="mt-4 flex justify-center">
                   <ConnectButton userId={profile.userId} />
                 </div>
-              </div>
-            </Card>
+              </Card>
+            </motion.div>
           ))}
         </div>
       )}
-    </div>
+    </motion.div>
   );
 }

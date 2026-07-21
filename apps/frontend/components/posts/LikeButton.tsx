@@ -1,53 +1,37 @@
 "use client";
 
 import { useState } from "react";
-import { ThumbsUp } from "lucide-react";
+import { Heart } from "lucide-react";
 import { Button } from "@/components/ui/Button";
-import { useAppDispatch, useAppSelector } from "@/store/hooks";
+import { useAppDispatch } from "@/store/hooks";
 import { likePost, unlikePost } from "@/store/thunks/postsThunks";
-import { updatePostLikes } from "@/store/slices/postsSlice";
-import { addToast } from "@/store/slices/uiSlice";
-import type { Post } from "@/types";
+import { cn } from "@/lib/utils";
 
 interface LikeButtonProps {
-  post: Post;
+  postId: number;
+  likedByUser: boolean;
+  likes: number;
 }
 
-export function LikeButton({ post }: LikeButtonProps) {
+export function LikeButton({ postId, likedByUser: initialLiked, likes: initialLikes }: LikeButtonProps) {
   const dispatch = useAppDispatch();
-  const [isLoading, setIsLoading] = useState(false);
-  const isLiked = post.likedByUser || false;
+  const [optimisticLiked, setOptimisticLiked] = useState(initialLiked);
+  const [optimisticCount, setOptimisticCount] = useState(initialLikes);
 
   const handleLike = async () => {
-    if (isLoading) return;
-    setIsLoading(true);
+    const wasLiked = optimisticLiked;
+    setOptimisticLiked(!wasLiked);
+    setOptimisticCount((c) => (wasLiked ? c - 1 : c + 1));
 
     try {
-      if (isLiked) {
-        await dispatch(unlikePost(post.postId)).unwrap();
-        dispatch(
-          updatePostLikes({
-            postId: post.postId,
-            likes: post.likes - 1,
-            likedByUser: false,
-          })
-        );
+      if (wasLiked) {
+        await dispatch(unlikePost(postId)).unwrap();
       } else {
-        await dispatch(likePost(post.postId)).unwrap();
-        dispatch(
-          updatePostLikes({
-            postId: post.postId,
-            likes: post.likes + 1,
-            likedByUser: true,
-          })
-        );
+        await dispatch(likePost(postId)).unwrap();
       }
     } catch {
-      dispatch(
-        addToast({ message: "Failed to update like", type: "error" })
-      );
-    } finally {
-      setIsLoading(false);
+      setOptimisticLiked(wasLiked);
+      setOptimisticCount((c) => (wasLiked ? c + 1 : c - 1));
     }
   };
 
@@ -56,11 +40,15 @@ export function LikeButton({ post }: LikeButtonProps) {
       variant="ghost"
       size="sm"
       onClick={handleLike}
-      loading={isLoading}
-      className={isLiked ? "text-primary" : ""}
+      className={cn(
+        "transition-colors",
+        optimisticLiked
+          ? "text-danger hover:text-danger/80"
+          : "text-text-tertiary hover:text-text-secondary"
+      )}
     >
-      <ThumbsUp size={16} className={isLiked ? "fill-current" : ""} />
-      {post.likes > 0 ? post.likes : "Like"}
+      <Heart size={15} className={cn(optimisticLiked && "fill-current")} />
+      {optimisticCount}
     </Button>
   );
 }

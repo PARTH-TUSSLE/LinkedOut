@@ -1,90 +1,67 @@
 "use client";
 
 import { useState, useRef } from "react";
-import { Image, X } from "lucide-react";
-import { Card } from "@/components/ui/Card";
+import { Image, Send, X } from "lucide-react";
 import { Button } from "@/components/ui/Button";
+import { Card } from "@/components/ui/Card";
 import { Avatar } from "@/components/ui/Avatar";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { createPost } from "@/store/thunks/postsThunks";
-import { addPost, setCreating } from "@/store/slices/postsSlice";
-import { addToast } from "@/store/slices/uiSlice";
+import { addPost } from "@/store/slices/postsSlice";
 
 export function CreatePostForm() {
   const dispatch = useAppDispatch();
   const { user } = useAppSelector((state) => state.auth);
-  const { isCreating } = useAppSelector((state) => state.posts);
-  const [body, setBody] = useState("");
-  const [media, setMedia] = useState<File | null>(null);
-  const [preview, setPreview] = useState<string | null>(null);
+  const [content, setContent] = useState("");
+  const [file, setFile] = useState<File | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      setMedia(file);
-      setPreview(URL.createObjectURL(file));
+  const handleSubmit = async () => {
+    if (!content.trim() && !file) return;
+    setIsSubmitting(true);
+
+    try {
+      const result = await dispatch(
+        createPost({ body: content, media: file ?? undefined })
+      ).unwrap();
+      dispatch(addPost(result));
+      setContent("");
+      setFile(null);
+    } catch {
+      // handled by thunk
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
-  const handleSubmit = async () => {
-    if (!body.trim()) {
-      dispatch(addToast({ message: "Post cannot be empty", type: "error" }));
-      return;
-    }
-
-    dispatch(setCreating(true));
-    try {
-      const result = await dispatch(
-        createPost({ body: body.trim(), media: media || undefined })
-      ).unwrap();
-      dispatch(addPost(result));
-      setBody("");
-      setMedia(null);
-      setPreview(null);
-      dispatch(addToast({ message: "Post created", type: "success" }));
-    } catch (err: any) {
-      dispatch(
-        addToast({
-          message: typeof err === "string" ? err : "Failed to create post",
-          type: "error",
-        })
-      );
-    } finally {
-      dispatch(setCreating(false));
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      handleSubmit();
     }
   };
 
   return (
     <Card className="p-4">
       <div className="flex gap-3">
-        <Avatar
-          src={user?.profilePicture}
-          alt={user?.name || ""}
-          size="md"
-        />
-        <div className="flex-1">
+        <Avatar src={user?.profilePicture} alt={user?.name || "You"} size="md" />
+        <div className="flex-1 min-w-0">
           <textarea
-            placeholder="What do you want to share?"
-            value={body}
-            onChange={(e) => setBody(e.target.value)}
-            rows={3}
-            className="w-full resize-none rounded-lg border-0 bg-transparent text-sm text-text-primary placeholder:text-text-muted focus:outline-none"
+            value={content}
+            onChange={(e) => setContent(e.target.value)}
+            onKeyDown={handleKeyDown}
+            placeholder="Share something with your network..."
+            rows={2}
+            className="w-full resize-none bg-transparent text-body-sm text-text-primary placeholder:text-text-tertiary outline-none"
           />
 
-          {preview && (
-            <div className="relative mt-2 inline-block">
-              <img
-                src={preview}
-                alt="Preview"
-                className="h-20 w-20 rounded-lg object-cover"
-              />
+          {file && (
+            <div className="mt-2 flex items-center gap-2 rounded-lg border border-border bg-card-hover px-3 py-1.5">
+              <span className="flex-1 truncate text-body-sm text-text-secondary">{file.name}</span>
               <button
-                onClick={() => {
-                  setMedia(null);
-                  setPreview(null);
-                }}
-                className="absolute -right-2 -top-2 rounded-full bg-surface p-0.5 shadow-sm"
+                onClick={() => setFile(null)}
+                className="text-text-tertiary hover:text-text-primary transition-colors"
               >
                 <X size={14} />
               </button>
@@ -93,21 +70,26 @@ export function CreatePostForm() {
 
           <div className="mt-3 flex items-center justify-between border-t border-border pt-3">
             <button
-              type="button"
               onClick={() => fileRef.current?.click()}
-              className="flex items-center gap-2 rounded-lg px-3 py-1.5 text-sm text-text-secondary transition-colors hover:bg-bg"
+              className="flex items-center gap-1.5 rounded-lg px-2 py-1 text-body-sm text-text-tertiary hover:text-text-secondary hover:bg-card-hover transition-colors"
             >
-              <Image size={18} />
+              <Image size={15} />
               Media
             </button>
             <input
               ref={fileRef}
               type="file"
-              accept="image/*,video/*"
+              accept="image/*"
               className="hidden"
-              onChange={handleFileChange}
+              onChange={(e) => setFile(e.target.files?.[0] || null)}
             />
-            <Button size="sm" onClick={handleSubmit} loading={isCreating}>
+            <Button
+              size="sm"
+              onClick={handleSubmit}
+              loading={isSubmitting}
+              disabled={!content.trim() && !file}
+            >
+              <Send size={14} />
               Post
             </Button>
           </div>

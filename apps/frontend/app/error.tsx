@@ -1,5 +1,8 @@
 "use client";
 
+import { AlertTriangle } from "lucide-react";
+import { Button } from "@/components/ui/Button";
+
 export default function RootError({
   error,
   reset,
@@ -10,18 +13,16 @@ export default function RootError({
   return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-bg">
       <div className="text-center">
-        <h1 className="text-4xl font-bold text-text-primary">
-          Something went wrong
-        </h1>
-        <p className="mt-2 text-text-secondary">
+        <div className="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-xl border border-border-danger bg-danger-subtle">
+          <AlertTriangle size={24} className="text-danger" />
+        </div>
+        <h1 className="text-h3 text-text-primary">Something went wrong</h1>
+        <p className="mt-1.5 text-body-sm text-text-secondary">
           {error.message || "An unexpected error occurred"}
         </p>
-        <button
-          onClick={reset}
-          className="mt-6 inline-flex items-center gap-2 rounded-lg bg-primary px-6 py-2.5 text-sm font-medium text-white transition-colors hover:bg-primary-hover"
-        >
-          Try again
-        </button>
+        <div className="mt-6">
+          <Button onClick={reset}>Try again</Button>
+        </div>
       </div>
     </div>
   );

@@ -1,8 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
-import Link from "next/link";
-import { Pencil } from "lucide-react";
+import { motion } from "framer-motion";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { fetchMyProfile } from "@/store/thunks/profileThunks";
 import { setProfile, setLoading } from "@/store/slices/profileSlice";
@@ -11,10 +10,9 @@ import { ProfileBio } from "@/components/profile/ProfileBio";
 import { ProfileEducation } from "@/components/profile/ProfileEducation";
 import { ProfileWorkHistory } from "@/components/profile/ProfileWorkHistory";
 import { ProfilePictureUpload } from "@/components/profile/ProfilePictureUpload";
-import { ResumeDownloadButton } from "@/components/profile/ResumeDownloadButton";
-import { Button } from "@/components/ui/Button";
 import { Spinner } from "@/components/ui/Spinner";
 import { ErrorState } from "@/components/ui/ErrorState";
+import { Card } from "@/components/ui/Card";
 
 export default function MyProfilePage() {
   const dispatch = useAppDispatch();
@@ -35,7 +33,7 @@ export default function MyProfilePage() {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center py-20">
-        <Spinner size={24} />
+        <Spinner />
       </div>
     );
   }
@@ -49,37 +47,21 @@ export default function MyProfilePage() {
   }
 
   return (
-    <div className="mx-auto max-w-2xl space-y-4 p-4">
-      <div className="relative rounded-xl border border-border bg-surface p-6 shadow-sm">
+    <motion.div
+      initial={{ opacity: 0, y: 4 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
+      className="mx-auto max-w-2xl space-y-4 p-4 sm:p-6"
+    >
+      <Card className="p-5 sm:p-6">
         <div className="flex flex-col items-center gap-4 sm:flex-row">
           <ProfilePictureUpload user={user} />
-          <div className="flex-1 text-center sm:text-left">
-            <h1 className="text-xl font-bold text-text-primary">{user.name}</h1>
-            <p className="text-sm text-text-secondary">@{user.username}</p>
-            {profile.occupationStatus && (
-              <p className="mt-1 text-sm font-medium text-text-primary">
-                {profile.occupationStatus}
-              </p>
-            )}
-            {profile.location && (
-              <p className="text-sm text-text-muted">{profile.location}</p>
-            )}
-          </div>
-          <div className="flex gap-2">
-            <ResumeDownloadButton userId={user.id} />
-            <Link href="/profile/edit">
-              <Button variant="outline" size="sm">
-                <Pencil size={16} />
-                Edit
-              </Button>
-            </Link>
-          </div>
+          <ProfileHeader user={user} profile={profile} isOwn />
         </div>
-      </div>
-
+      </Card>
       <ProfileBio bio={profile.bio} />
       <ProfileEducation education={profile.education} />
       <ProfileWorkHistory workHistory={profile.workHistory} />
-    </div>
+    </motion.div>
   );
 }

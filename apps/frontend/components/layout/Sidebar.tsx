@@ -9,6 +9,7 @@ import {
   Settings,
   LogOut,
   UserPlus,
+  Linkedin,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
@@ -16,10 +17,11 @@ import { logout } from "@/store/slices/authSlice";
 import { logoutUser } from "@/store/thunks/authThunks";
 import { useRouter } from "next/navigation";
 import { Avatar } from "@/components/ui/Avatar";
+import { toggleSidebar } from "@/store/slices/uiSlice";
 
 const navItems = [
   { href: "/dashboard", label: "Feed", icon: LayoutDashboard },
-  { href: "/network", label: "Network", icon: Users },
+  { href: "/network", label: "Discover", icon: Users },
   { href: "/my-network", label: "My Network", icon: UserPlus },
   { href: "/profile", label: "Profile", icon: UserCircle },
   { href: "/settings", label: "Settings", icon: Settings },
@@ -42,38 +44,25 @@ export function Sidebar() {
     <>
       {sidebarOpen && (
         <div
-          className="fixed inset-0 z-20 bg-overlay/50 lg:hidden"
-          onClick={() => dispatch({ type: "ui/toggleSidebar" })}
+          className="fixed inset-0 z-20 bg-black/40 lg:hidden"
+          onClick={() => dispatch(toggleSidebar())}
         />
       )}
 
       <aside
         className={cn(
-          "fixed left-0 top-0 z-30 flex h-full w-60 flex-col border-r border-border bg-sidebar transition-transform duration-200 lg:translate-x-0",
+          "fixed left-0 top-0 z-30 flex h-full w-56 flex-col border-r border-border bg-card transition-transform duration-300 lg:translate-x-0",
           sidebarOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
         )}
       >
-        <div className="flex h-14 items-center border-b border-border px-4">
-          <Link href="/dashboard" className="text-lg font-bold text-primary">
-            LinkedOut
-          </Link>
+        <div className="flex h-14 items-center gap-2.5 px-5 border-b border-border">
+          <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-accent text-accent-text">
+            <Linkedin size={15} />
+          </div>
+          <span className="text-body-sm font-semibold text-text-primary">LinkedOut</span>
         </div>
 
-        {user && (
-          <div className="flex items-center gap-3 border-b border-border px-4 py-3">
-            <Avatar src={user.profilePicture} alt={user.name} size="sm" />
-            <div className="min-w-0 flex-1">
-              <p className="truncate text-sm font-medium text-sidebar-text">
-                {user.name}
-              </p>
-              <p className="truncate text-xs text-sidebar-text-muted">
-                @{user.username}
-              </p>
-            </div>
-          </div>
-        )}
-
-        <nav className="flex-1 space-y-0.5 px-2 py-3">
+        <nav className="flex-1 space-y-0.5 px-2 py-4">
           {navItems.map((item) => {
             const isActive =
               item.href === "/dashboard"
@@ -84,25 +73,44 @@ export function Sidebar() {
                 key={item.href}
                 href={item.href}
                 className={cn(
-                  "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
+                  "flex items-center gap-3 rounded-lg px-3 py-2 text-body-sm font-medium transition-all duration-150",
                   isActive
-                    ? "bg-sidebar-active text-primary"
-                    : "text-sidebar-text-muted hover:bg-sidebar-hover hover:text-sidebar-text"
+                    ? "bg-accent-subtle text-accent"
+                    : "text-text-tertiary hover:bg-card-hover hover:text-text-secondary"
                 )}
               >
-                <item.icon size={18} />
+                <item.icon size={17} />
                 {item.label}
               </Link>
             );
           })}
         </nav>
 
+        {user && (
+          <div className="border-t border-border p-3">
+            <Link
+              href="/profile"
+              className="flex items-center gap-3 rounded-lg px-2 py-2 transition-colors hover:bg-card-hover"
+            >
+              <Avatar src={user.profilePicture} alt={user.name} size="sm" />
+              <div className="min-w-0 flex-1">
+                <p className="truncate text-body-sm font-medium text-text-primary">
+                  {user.name}
+                </p>
+                <p className="truncate text-caption text-text-tertiary">
+                  @{user.username}
+                </p>
+              </div>
+            </Link>
+          </div>
+        )}
+
         <div className="border-t border-border p-2">
           <button
             onClick={handleLogout}
-            className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-sidebar-text-muted transition-colors hover:bg-sidebar-hover hover:text-danger"
+            className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-body-sm font-medium text-text-tertiary transition-all duration-150 hover:bg-danger-subtle hover:text-danger"
           >
-            <LogOut size={18} />
+            <LogOut size={17} />
             Sign out
           </button>
         </div>

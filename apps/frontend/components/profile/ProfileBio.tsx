@@ -8,9 +8,11 @@ export function ProfileBio({ bio }: ProfileBioProps) {
   if (!bio) return null;
 
   return (
-    <Card className="p-4">
-      <h2 className="mb-2 text-sm font-semibold text-text-primary">About</h2>
-      <p className="text-sm leading-relaxed text-text-secondary">{bio}</p>
+    <Card className="p-5">
+      <h3 className="text-label text-text-tertiary mb-2">About</h3>
+      <p className="text-body-sm text-text-secondary leading-relaxed whitespace-pre-wrap">
+        {bio}
+      </p>
     </Card>
   );
 }

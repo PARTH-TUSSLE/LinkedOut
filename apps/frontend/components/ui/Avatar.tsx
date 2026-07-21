@@ -1,50 +1,44 @@
-"use client";
-
 import Image from "next/image";
 import { cn } from "@/lib/utils";
-import { getFileUrl } from "@/config/axios";
-import { User } from "lucide-react";
+import { getFileUrl } from "@/lib/utils";
 
 interface AvatarProps {
   src?: string | null;
-  alt?: string;
-  size?: "sm" | "md" | "lg";
+  alt: string;
+  size?: "sm" | "md" | "lg" | "xl";
   className?: string;
 }
 
-const sizeMap = {
-  sm: "h-8 w-8",
-  md: "h-12 w-12",
-  lg: "h-24 w-24",
+const sizes = {
+  sm: "h-7 w-7 text-caption",
+  md: "h-9 w-9 text-body-sm",
+  lg: "h-12 w-12 text-body",
+  xl: "h-16 w-16 text-h4",
 };
 
-const iconSizeMap = {
-  sm: 16,
-  md: 20,
-  lg: 32,
-};
-
-export function Avatar({ src, alt = "", size = "md", className }: AvatarProps) {
-  const imageUrl = getFileUrl(src || null);
+export function Avatar({ src, alt, size = "md", className }: AvatarProps) {
+  const url = getFileUrl(src);
 
   return (
     <div
       className={cn(
-        "relative flex shrink-0 items-center justify-center overflow-hidden rounded-full bg-bg",
-        sizeMap[size],
+        "relative shrink-0 overflow-hidden rounded-full bg-card-hover ring-1 ring-border",
+        sizes[size],
         className
       )}
     >
-      {imageUrl ? (
+      {url ? (
         <Image
-          src={imageUrl}
+          src={url}
           alt={alt}
           fill
           className="object-cover"
           unoptimized
         />
       ) : (
-        <User className="text-text-muted" size={iconSizeMap[size]} />
+        <div className="flex h-full w-full items-center justify-center font-medium text-text-secondary">
+          {alt.charAt(0).toUpperCase()}
+        </div>
       )}
     </div>
   );

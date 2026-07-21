@@ -1,11 +1,13 @@
 "use client";
 
-import { useEffect } from "react";
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { Save } from "lucide-react";
 import { useForm } from "react-hook-form";
-import { Plus, Save } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { TextArea } from "@/components/ui/TextArea";
+import { Card } from "@/components/ui/Card";
 import { EducationForm } from "./EducationForm";
 import { WorkHistoryForm } from "./WorkHistoryForm";
 import { useAppDispatch } from "@/store/hooks";
@@ -13,109 +15,53 @@ import { updateProfile } from "@/store/thunks/profileThunks";
 import { addToast } from "@/store/slices/uiSlice";
 import type { Profile } from "@/types";
 
-export interface ProfileEditFormData {
-  bio: string;
-  occupationStatus: string;
-  location: string;
-  education: Array<{
-    school: string;
-    degree: string;
-    fieldOfStudy: string;
-    startYear?: number | null;
-    endYear?: number | null;
-  }>;
-  workHistory: Array<{
-    company: string;
-    location: string;
-    position: string;
-    years: string;
-    startDate: string;
-    endDate: string;
-    description: string;
-  }>;
-}
-
 interface ProfileEditFormProps {
   profile: Profile;
-  onSuccess: () => void;
 }
 
-export function ProfileEditForm({ profile, onSuccess }: ProfileEditFormProps) {
+export function ProfileEditForm({ profile }: ProfileEditFormProps) {
   const dispatch = useAppDispatch();
+  const router = useRouter();
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [education, setEducation] = useState(profile.education || []);
+  const [workHistory, setWorkHistory] = useState(profile.workHistory || []);
 
-  const {
-    register,
-    handleSubmit,
-    formState: { errors, isSubmitting },
-    watch,
-    setValue,
-  } = useForm<ProfileEditFormData>({
+  const { register, handleSubmit } = useForm({
     defaultValues: {
       bio: profile.bio || "",
       occupationStatus: profile.occupationStatus || "",
       location: profile.location || "",
-      education: profile.education.length > 0
-        ? profile.education.map((e) => ({
-            school: e.school,
-            degree: e.degree,
-            fieldOfStudy: e.fieldOfStudy,
-            startYear: e.startDate ? new Date(e.startDate).getFullYear() : null,
-            endYear: e.endDate ? new Date(e.endDate).getFullYear() : null,
-          }))
-        : [{ school: "", degree: "", fieldOfStudy: "", startYear: null, endYear: null }],
-      workHistory: profile.workHistory.length > 0
-        ? profile.workHistory.map((w) => ({
-            company: w.company,
-            location: w.location || "",
-            position: w.position,
-            years: w.years,
-            startDate: w.startDate ? w.startDate.split("T")[0] : "",
-            endDate: w.endDate ? w.endDate.split("T")[0] : "",
-            description: w.description || "",
-          }))
-        : [{ company: "", location: "", position: "", years: "", startDate: "", endDate: "", description: "" }],
     },
   });
 
-  const educationFields = watch("education");
-  const workHistoryFields = watch("workHistory");
-
-  const addEducation = () => {
-    setValue("education", [
-      ...educationFields,
-      { school: "", degree: "", fieldOfStudy: "", startYear: null, endYear: null },
-    ]);
-  };
-
-  const removeEducation = (index: number) => {
-    setValue(
-      "education",
-      educationFields.filter((_, i) => i !== index)
-    );
-  };
-
-  const addWorkHistory = () => {
-    setValue("workHistory", [
-      ...workHistoryFields,
-      { company: "", location: "", position: "", years: "", startDate: "", endDate: "", description: "" },
-    ]);
-  };
-
-  const removeWorkHistory = (index: number) => {
-    setValue(
-      "workHistory",
-      workHistoryFields.filter((_, i) => i !== index)
-    );
-  };
-
-  const onSubmit = async (data: ProfileEditFormData) => {
+  const onSubmit = async (data: any) => {
+    setIsSubmitting(true);
     try {
       await dispatch(
-        updateProfile(data)
+        updateProfile({
+          bio: data.bio,
+          occupationStatus: data.occupationStatus,
+          location: data.location,
+          education: education.map((e: any) => ({
+            school: e.school || "",
+            degree: e.degree || "",
+            fieldOfStudy: e.fieldOfStudy || "",
+            startYear: e.startDate ? new Date(e.startDate).getFullYear() : null,
+            endYear: e.endDate ? new Date(e.endDate).getFullYear() : null,
+          })),
+          workHistory: workHistory.map((w: any) => ({
+            company: w.company || "",
+            location: w.location || "",
+            position: w.position || "",
+            years: w.years || "",
+            startDate: w.startDate || null,
+            endDate: w.endDate || null,
+            description: w.description || "",
+          })),
+        })
       ).unwrap();
-
       dispatch(addToast({ message: "Profile updated", type: "success" }));
-      onSuccess();
+      router.push("/profile");
     } catch (err: any) {
       dispatch(
         addToast({
@@ -123,87 +69,47 @@ export function ProfileEditForm({ profile, onSuccess }: ProfileEditFormProps) {
           type: "error",
         })
       );
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-      <div className="space-y-4">
-        <h2 className="text-base font-semibold text-text-primary">
-          Profile details
-        </h2>
+      <Card className="p-5 space-y-4">
+        <h3 className="text-label text-text-tertiary">Basic Information</h3>
+        <Input
+          label="Occupation / Title"
+          placeholder="Software Engineer at..."
+          {...register("occupationStatus")}
+        />
+        <Input
+          label="Location"
+          placeholder="San Francisco, CA"
+          {...register("location")}
+        />
         <TextArea
           label="Bio"
-          placeholder="Tell us about yourself"
-          rows={3}
-          error={errors.bio?.message}
+          placeholder="Tell people about yourself..."
+          rows={4}
           {...register("bio")}
         />
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-          <Input
-            label="Occupation"
-            placeholder="Software Engineer"
-            error={errors.occupationStatus?.message}
-            {...register("occupationStatus")}
-          />
-          <Input
-            label="Location"
-            placeholder="San Francisco, CA"
-            error={errors.location?.message}
-            {...register("location")}
-          />
-        </div>
-      </div>
+      </Card>
 
-      <div className="space-y-4">
-        <div className="flex items-center justify-between">
-          <h2 className="text-base font-semibold text-text-primary">
-            Education
-          </h2>
-          <Button type="button" variant="outline" size="sm" onClick={addEducation}>
-            <Plus size={16} />
-            Add
-          </Button>
-        </div>
-        <div className="space-y-3">
-          {educationFields.map((_, index) => (
-            <EducationForm
-              key={index}
-              index={index}
-              register={register}
-              errors={errors}
-              onRemove={() => removeEducation(index)}
-            />
-          ))}
-        </div>
-      </div>
+      <Card className="p-5">
+        <EducationForm data={education} onChange={setEducation} />
+      </Card>
 
-      <div className="space-y-4">
-        <div className="flex items-center justify-between">
-          <h2 className="text-base font-semibold text-text-primary">
-            Work experience
-          </h2>
-          <Button type="button" variant="outline" size="sm" onClick={addWorkHistory}>
-            <Plus size={16} />
-            Add
-          </Button>
-        </div>
-        <div className="space-y-3">
-          {workHistoryFields.map((_, index) => (
-            <WorkHistoryForm
-              key={index}
-              index={index}
-              register={register}
-              errors={errors}
-              onRemove={() => removeWorkHistory(index)}
-            />
-          ))}
-        </div>
-      </div>
+      <Card className="p-5">
+        <WorkHistoryForm data={workHistory} onChange={setWorkHistory} />
+      </Card>
 
       <div className="flex justify-end gap-3">
+        <Button type="button" variant="secondary" onClick={() => router.back()}>
+          Cancel
+        </Button>
         <Button type="submit" loading={isSubmitting}>
-          <Save size={16} />
+          <Save size={15} />
           Save changes
         </Button>
       </div>
