@@ -61,14 +61,14 @@ export default function SettingsPage() {
       transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
       className="mx-auto max-w-2xl p-4 sm:p-6"
     >
-      <div className="mb-6">
+      <div className="mb-8">
         <h1 className="text-h3 text-text-primary">Settings</h1>
-        <p className="text-body-sm text-text-secondary">
+        <p className="mt-1 text-body-sm text-text-secondary">
           Manage your account settings
         </p>
       </div>
 
-      <Card className="p-5">
+      <Card className="p-5 shadow-md">
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <Input
             label="Username"

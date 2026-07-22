@@ -11,7 +11,7 @@ export default function RootError({
   reset: () => void;
 }) {
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center bg-bg">
+    <div className="flex min-h-screen flex-col items-center justify-center">
       <div className="text-center">
         <div className="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-xl border border-border-danger bg-danger-subtle">
           <AlertTriangle size={24} className="text-danger" />

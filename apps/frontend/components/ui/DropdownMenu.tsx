@@ -36,7 +36,7 @@ export function DropdownMenu({ trigger, items, align = "end" }: DropdownMenuProp
       {open && (
         <div
           className={cn(
-            "absolute top-full mt-1 z-50 min-w-[160px] rounded-lg border border-border bg-card py-1 shadow-lg",
+            "absolute top-full mt-1 z-50 min-w-[160px] rounded-xl border border-border bg-card py-1 shadow-xl",
             align === "end" ? "right-0" : "left-0"
           )}
         >

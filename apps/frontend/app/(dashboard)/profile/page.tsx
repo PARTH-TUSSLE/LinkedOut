@@ -51,9 +51,9 @@ export default function MyProfilePage() {
       initial={{ opacity: 0, y: 4 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
-      className="mx-auto max-w-2xl space-y-4 p-4 sm:p-6"
+      className="mx-auto max-w-2xl space-y-5 p-4 sm:p-6"
     >
-      <Card className="p-5 sm:p-6">
+      <Card className="p-5 sm:p-6 shadow-md">
         <div className="flex flex-col items-center gap-4 sm:flex-row">
           <ProfilePictureUpload user={user} />
           <ProfileHeader user={user} profile={profile} isOwn />

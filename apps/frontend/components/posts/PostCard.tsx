@@ -33,7 +33,7 @@ export function PostCard({ post, onDelete }: PostCardProps) {
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
     >
-      <Card className="p-4 sm:p-5">
+      <Card className="p-4 sm:p-5 shadow-sm hover:shadow-md transition-shadow duration-200">
         <div className="flex items-start justify-between gap-3">
           <div className="flex items-start gap-3">
             <Link href={`/profile/${post.creator?.id}`}>

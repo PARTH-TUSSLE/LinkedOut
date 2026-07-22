@@ -51,12 +51,12 @@ export function Sidebar() {
 
       <aside
         className={cn(
-          "fixed left-0 top-0 z-30 flex h-full w-56 flex-col border-r border-border bg-card transition-transform duration-300 lg:translate-x-0",
+          "fixed left-0 top-0 z-30 flex h-full w-56 flex-col border-r border-border bg-card shadow-lg transition-transform duration-300 lg:translate-x-0",
           sidebarOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
         )}
       >
         <div className="flex h-14 items-center gap-2.5 px-5 border-b border-border">
-          <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-accent text-accent-text">
+          <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-accent text-accent-text shadow-sm">
             <Linkedin size={15} />
           </div>
           <span className="text-body-sm font-semibold text-text-primary">LinkedOut</span>
@@ -75,7 +75,7 @@ export function Sidebar() {
                 className={cn(
                   "flex items-center gap-3 rounded-lg px-3 py-2 text-body-sm font-medium transition-all duration-150",
                   isActive
-                    ? "bg-accent-subtle text-accent"
+                    ? "bg-accent-subtle text-accent shadow-sm"
                     : "text-text-tertiary hover:bg-card-hover hover:text-text-secondary"
                 )}
               >

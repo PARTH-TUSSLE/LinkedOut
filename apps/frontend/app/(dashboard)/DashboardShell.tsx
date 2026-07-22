@@ -44,14 +44,14 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
 
   if (!isAuthenticated) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-bg">
+      <div className="flex min-h-screen items-center justify-center">
         <Spinner />
       </div>
     );
   }
 
   return (
-    <div className="flex h-screen overflow-hidden bg-bg">
+    <div className="flex h-screen overflow-hidden">
       <Sidebar />
       <div className="flex flex-1 flex-col lg:pl-56">
         <Navbar />

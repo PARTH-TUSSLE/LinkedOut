@@ -12,7 +12,7 @@ export function Navbar() {
   const { user } = useAppSelector((state) => state.auth);
 
   return (
-    <header className="sticky top-0 z-10 border-b border-border bg-bg-elevated">
+    <header className="sticky top-0 z-10 glass">
       <div className="flex h-12 items-center justify-between px-4 lg:px-6">
         <button
           onClick={() => dispatch(toggleSidebar())}
