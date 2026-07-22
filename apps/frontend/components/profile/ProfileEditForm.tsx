@@ -76,7 +76,7 @@ export function ProfileEditForm({ profile }: ProfileEditFormProps) {
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-      <Card className="p-5 space-y-4">
+      <Card className="p-5 space-y-4 shadow-sm">
         <h3 className="text-label text-text-tertiary">Basic Information</h3>
         <Input
           label="Occupation / Title"
@@ -96,11 +96,11 @@ export function ProfileEditForm({ profile }: ProfileEditFormProps) {
         />
       </Card>
 
-      <Card className="p-5">
+      <Card className="p-5 shadow-sm">
         <EducationForm data={education} onChange={setEducation} />
       </Card>
 
-      <Card className="p-5">
+      <Card className="p-5 shadow-sm">
         <WorkHistoryForm data={workHistory} onChange={setWorkHistory} />
       </Card>
 

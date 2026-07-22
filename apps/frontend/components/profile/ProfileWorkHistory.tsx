@@ -11,7 +11,7 @@ export function ProfileWorkHistory({ workHistory }: ProfileWorkHistoryProps) {
   if (!workHistory || workHistory.length === 0) return null;
 
   return (
-    <Card className="p-5">
+    <Card className="p-5 shadow-sm">
       <h3 className="text-label text-text-tertiary mb-4">Work History</h3>
       <div className="space-y-4">
         {workHistory.map((item, i) => (

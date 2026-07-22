@@ -12,14 +12,14 @@ export function PublicNavbar() {
       initial={{ y: -12, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
       transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
-      className="fixed top-0 left-0 right-0 z-40 border-b border-border bg-bg/80 backdrop-blur-lg"
+      className="fixed top-0 left-0 right-0 z-40 glass"
     >
       <div className="mx-auto flex h-12 max-w-6xl items-center justify-between px-4 sm:px-6">
         <Link
           href="/"
           className="flex items-center gap-2.5 text-body-sm font-semibold text-text-primary"
         >
-          <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-accent text-accent-text">
+          <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-accent text-accent-text shadow-sm">
             <Linkedin size={15} />
           </div>
           LinkedOut

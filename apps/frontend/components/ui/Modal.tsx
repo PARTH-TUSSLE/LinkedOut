@@ -50,7 +50,7 @@ export function Modal({ open, onClose, title, children, className }: ModalProps)
             exit={{ opacity: 0, scale: 0.96, y: 8 }}
             transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
             className={cn(
-              "relative w-full max-w-lg rounded-xl border border-border bg-card p-6 shadow-xl",
+              "relative w-full max-w-lg rounded-2xl border border-border bg-card p-6 shadow-2xl",
               className
             )}
           >

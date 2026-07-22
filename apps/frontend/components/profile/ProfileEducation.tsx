@@ -11,7 +11,7 @@ export function ProfileEducation({ education }: ProfileEducationProps) {
   if (!education || education.length === 0) return null;
 
   return (
-    <Card className="p-5">
+    <Card className="p-5 shadow-sm">
       <h3 className="text-label text-text-tertiary mb-4">Education</h3>
       <div className="space-y-4">
         {education.map((item, i) => (

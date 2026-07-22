@@ -64,12 +64,12 @@ export default function MyNetworkPage() {
       transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
       className="mx-auto max-w-2xl p-4 sm:p-6"
     >
-      <div className="mb-6">
+      <div className="mb-8">
         <h1 className="text-h3 text-text-primary">My Network</h1>
-        <p className="text-body-sm text-text-secondary">Manage your connections</p>
+        <p className="mt-1 text-body-sm text-text-secondary">Manage your connections</p>
       </div>
 
-      <div className="mb-4 flex items-center gap-1 rounded-lg border border-border bg-card-hover p-0.5">
+      <div className="mb-4 flex items-center gap-1 rounded-xl border border-border bg-card-hover p-0.5 shadow-sm">
         {tabs.map((t) => (
           <button
             key={t.id}

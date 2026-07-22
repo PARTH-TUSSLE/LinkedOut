@@ -34,7 +34,7 @@ export function ProfilePictureUpload({ user }: ProfilePictureUploadProps) {
 
   return (
     <div className="relative shrink-0">
-      <div className="h-20 w-20 overflow-hidden rounded-full bg-card-hover ring-2 ring-border">
+      <div className="h-20 w-20 overflow-hidden rounded-full bg-card-hover ring-2 ring-border shadow-sm">
         {url ? (
           <Image
             src={url}

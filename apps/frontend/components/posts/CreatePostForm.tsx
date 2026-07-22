@@ -43,7 +43,7 @@ export function CreatePostForm() {
   };
 
   return (
-    <Card className="p-4">
+    <Card className="p-4 sm:p-5">
       <div className="flex gap-3">
         <Avatar src={user?.profilePicture} alt={user?.name || "You"} size="md" />
         <div className="flex-1 min-w-0">

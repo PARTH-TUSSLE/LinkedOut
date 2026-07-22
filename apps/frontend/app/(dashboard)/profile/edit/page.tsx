@@ -47,9 +47,9 @@ export default function ProfileEditPage() {
       transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
       className="mx-auto max-w-2xl p-4 sm:p-6"
     >
-      <div className="mb-6">
+      <div className="mb-8">
         <h1 className="text-h3 text-text-primary">Edit Profile</h1>
-        <p className="text-body-sm text-text-secondary">Update your professional information</p>
+        <p className="mt-1 text-body-sm text-text-secondary">Update your professional information</p>
       </div>
       <ProfileEditForm profile={profile} />
     </motion.div>
