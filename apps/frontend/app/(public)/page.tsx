@@ -19,7 +19,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Badge } from "@/components/ui/Badge";
-import DotField from "@/components/DotField";
+import LandingBackground from "@/components/LandingBackground";
 
 const ease = [0.16, 1, 0.3, 1] as const;
 
@@ -68,9 +68,9 @@ function FeatureCard({
       initial="hidden"
       animate={inView ? "visible" : "hidden"}
       variants={fadeUp(index * 0.06)}
-      className="group rounded-xl border border-border bg-card p-6 transition-all duration-200 hover:border-border-hover hover:bg-card-hover"
+      className="group rounded-2xl border border-border bg-card p-6 shadow-sm transition-all duration-200 hover:border-border-hover hover:bg-card-hover hover:shadow-md"
     >
-      <div className="mb-3 flex h-9 w-9 items-center justify-center rounded-lg border border-border bg-card-hover text-accent transition-colors group-hover:bg-accent-subtle group-hover:border-accent/20">
+      <div className="mb-3 flex h-9 w-9 items-center justify-center rounded-lg border border-border bg-card-hover text-accent shadow-xs transition-all duration-200 group-hover:bg-accent-subtle group-hover:border-accent/20 group-hover:shadow-sm">
         <Icon size={17} />
       </div>
       <h3 className="text-body font-semibold text-text-primary mb-1.5">
@@ -87,31 +87,18 @@ export default function LandingPage() {
   const featuresRef = useRef<HTMLDivElement>(null);
 
   return (
-    <div className="relative min-h-screen">
-      {/* Dot Field — supporting background layer */}
-      <div className="fixed inset-0 z-0 opacity-30 dark:opacity-20 pointer-events-none">
-        <DotField
-          dotRadius={1.2}
-          dotSpacing={20}
-          cursorRadius={400}
-          bulgeOnly
-          bulgeStrength={50}
-          glowRadius={200}
-          gradientFrom="rgba(37, 99, 235, 0.12)"
-          gradientTo="rgba(37, 99, 235, 0.05)"
-          glowColor="#0a0a0e"
-        />
-      </div>
+    <div className="relative">
+      <LandingBackground />
 
-      <div className="relative z-10">
         {/* ═══ HERO ═══ */}
         <section className="relative flex min-h-[90vh] flex-col items-center justify-center px-4 pt-24 pb-20 overflow-hidden">
+
           <motion.div
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.4, delay: 0.15, ease }}
           >
-            <Badge variant="accent" className="mb-6">
+            <Badge variant="accent" className="mb-6 shadow-sm">
               Built for meaningful professional connections
             </Badge>
           </motion.div>
@@ -296,7 +283,7 @@ export default function LandingPage() {
                 viewport={{ once: true, margin: "-80px" }}
                 variants={fadeUp(0.15)}
               >
-                <div className="relative rounded-xl border border-border bg-card p-8 sm:p-10">
+                <div className="relative rounded-2xl border border-border bg-card p-8 sm:p-10 shadow-lg">
                   <Quote
                     size={24}
                     className="absolute top-6 right-6 text-text-tertiary"
@@ -337,7 +324,7 @@ export default function LandingPage() {
             whileInView="visible"
             viewport={{ once: true }}
             variants={fadeUp()}
-            className="relative mx-auto max-w-3xl rounded-xl border border-border bg-card p-8 sm:p-14 text-center"
+            className="relative mx-auto max-w-3xl rounded-2xl border border-border bg-card p-8 sm:p-14 text-center shadow-xl"
           >
             <SectionLabel>Get started</SectionLabel>
             <h2 className="text-h1 text-text-primary">
@@ -365,7 +352,7 @@ export default function LandingPage() {
         </section>
 
         {/* ═══ FOOTER ═══ */}
-        <footer className="border-t border-border">
+        <footer className="border-t border-border bg-card/50 backdrop-blur-sm">
           <div className="mx-auto max-w-7xl px-4 py-14 sm:px-6 lg:px-8">
             <div className="grid grid-cols-2 gap-8 md:grid-cols-4 lg:grid-cols-5">
               <div className="col-span-2 lg:col-span-2">
@@ -432,7 +419,6 @@ export default function LandingPage() {
             </div>
           </div>
         </footer>
-      </div>
     </div>
   );
 }
