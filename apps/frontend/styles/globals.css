@@ -139,28 +139,28 @@
   --radius-3xl: 1.25rem;
   --radius-4xl: 1.5rem;
 
-  --text-display: 4.5rem;
-  --text-display--line-height: 1.05;
-  --text-display--letter-spacing: -0.03em;
+  --text-display: 6rem;
+  --text-display--line-height: 1.03;
+  --text-display--letter-spacing: -0.035em;
   --text-display--font-weight: 700;
 
-  --text-hero: 3.75rem;
-  --text-hero--line-height: 1.08;
-  --text-hero--letter-spacing: -0.025em;
+  --text-hero: 5rem;
+  --text-hero--line-height: 1.05;
+  --text-hero--letter-spacing: -0.03em;
   --text-hero--font-weight: 700;
 
-  --text-h1: 2.25rem;
-  --text-h1--line-height: 1.15;
-  --text-h1--letter-spacing: -0.02em;
+  --text-h1: 2.75rem;
+  --text-h1--line-height: 1.12;
+  --text-h1--letter-spacing: -0.025em;
   --text-h1--font-weight: 700;
 
-  --text-h2: 1.875rem;
+  --text-h2: 2.25rem;
   --text-h2--line-height: 1.2;
-  --text-h2--letter-spacing: -0.015em;
+  --text-h2--letter-spacing: -0.02em;
   --text-h2--font-weight: 600;
 
   --text-h3: 1.5rem;
-  --text-h3--line-height: 1.25;
+  --text-h3--line-height: 1.3;
   --text-h3--letter-spacing: -0.01em;
   --text-h3--font-weight: 600;
 
@@ -169,17 +169,17 @@
   --text-h4--font-weight: 600;
 
   --text-body: 1rem;
-  --text-body--line-height: 1.6;
+  --text-body--line-height: 1.7;
 
   --text-body-sm: 0.875rem;
-  --text-body-sm--line-height: 1.55;
+  --text-body-sm--line-height: 1.6;
 
   --text-caption: 0.75rem;
-  --text-caption--line-height: 1.4;
+  --text-caption--line-height: 1.5;
 
-  --text-label: 0.75rem;
+  --text-label: 0.6875rem;
   --text-label--line-height: 1;
-  --text-label--letter-spacing: 0.06em;
+  --text-label--letter-spacing: 0.08em;
   --text-label--font-weight: 600;
   --text-label--text-transform: uppercase;
 }
@@ -222,7 +222,7 @@
   body {
     background-color: var(--bg);
     color: var(--text-primary);
-    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+    font-feature-settings: "calt", "liga", "kern";
   }
 
   ::selection {

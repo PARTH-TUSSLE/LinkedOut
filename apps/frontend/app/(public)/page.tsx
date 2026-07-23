@@ -42,7 +42,7 @@ const stagger = {
 
 function SectionLabel({ children }: { children: React.ReactNode }) {
   return (
-    <span className="inline-block text-label text-accent mb-4">
+    <span className="inline-block text-label text-accent mb-5">
       {children}
     </span>
   );
@@ -73,7 +73,7 @@ function FeatureCard({
       <div className="mb-3 flex h-9 w-9 items-center justify-center rounded-lg border border-border bg-card-hover text-accent shadow-xs transition-all duration-200 group-hover:bg-accent-subtle group-hover:border-accent/20 group-hover:shadow-sm">
         <Icon size={17} />
       </div>
-      <h3 className="text-body font-semibold text-text-primary mb-1.5">
+      <h3 className="text-h4 font-semibold text-text-primary mb-2">
         {title}
       </h3>
       <p className="text-body-sm text-text-secondary leading-relaxed">
@@ -99,9 +99,9 @@ export default function LandingPage() {
           cursorRadius={500}
           cursorForce={0.1}
           bulgeOnly
-          gradientFrom="#A855F7"
-          gradientTo="#B497CF"
-          glowColor="#120F17"
+          gradientFrom="#3B82F6"
+          gradientTo="#93C5FD"
+          glowColor="#0F172A"
         />
       </div>
 
@@ -113,7 +113,7 @@ export default function LandingPage() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.4, delay: 0.15, ease }}
           >
-            <Badge variant="accent" className="mb-6 shadow-sm">
+            <Badge variant="accent" className="mb-8 shadow-sm">
               Built for meaningful professional connections
             </Badge>
           </motion.div>
@@ -122,7 +122,7 @@ export default function LandingPage() {
             initial={{ opacity: 0, y: 24 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.25, ease }}
-            className="max-w-5xl text-center text-hero sm:text-[4rem] md:text-[4.5rem] lg:text-[5rem] font-bold tracking-tight leading-[1.05] text-text-primary"
+            className="max-w-6xl text-center text-5xl sm:text-[4.5rem] md:text-[5.5rem] lg:text-[6rem] font-bold tracking-[-0.03em] leading-[1.04] text-text-primary"
           >
             Connect with professionals{" "}
             <span className="text-accent">without exaggeration</span>
@@ -132,7 +132,7 @@ export default function LandingPage() {
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.4, delay: 0.35, ease }}
-            className="mt-5 max-w-xl text-center text-body text-text-secondary leading-relaxed"
+            className="mt-6 max-w-xl text-center text-body text-text-secondary leading-relaxed"
           >
             A professional networking platform built for meaningful connections.
             Showcase your experience, share insights, and grow your network.
@@ -142,7 +142,7 @@ export default function LandingPage() {
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.4, delay: 0.45, ease }}
-            className="mt-8 flex flex-col sm:flex-row items-center gap-3"
+            className="mt-10 flex flex-col sm:flex-row items-center gap-4"
           >
             <Link href="/signup">
               <Button size="xl">
@@ -161,7 +161,7 @@ export default function LandingPage() {
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.6, ease }}
-            className="mt-16 flex flex-wrap justify-center gap-10 sm:gap-16"
+            className="mt-20 flex flex-wrap justify-center gap-12 sm:gap-20"
           >
             {[
               { value: "10K+", label: "Active Users" },
@@ -169,10 +169,10 @@ export default function LandingPage() {
               { value: "100K+", label: "Posts Shared" },
             ].map((stat) => (
               <div key={stat.label} className="text-center">
-                <p className="text-2xl sm:text-3xl font-bold tracking-tight text-text-primary">
+                <p className="text-3xl sm:text-4xl font-bold tracking-tight text-text-primary">
                   {stat.value}
                 </p>
-                <p className="mt-1 text-caption text-text-tertiary">{stat.label}</p>
+                <p className="mt-1.5 text-caption text-text-tertiary tracking-wide">{stat.label}</p>
               </div>
             ))}
           </motion.div>
@@ -196,7 +196,7 @@ export default function LandingPage() {
                 Everything you need to{" "}
                 <span className="text-accent">grow professionally</span>
               </h2>
-              <p className="mt-4 text-body text-text-secondary">
+              <p className="mt-5 text-body text-text-secondary leading-relaxed">
                 Powerful tools to build your professional identity and connect
                 with the right people.
               </p>
@@ -207,7 +207,7 @@ export default function LandingPage() {
               initial="hidden"
               whileInView="visible"
               viewport={{ once: true, margin: "-80px" }}
-              className="mt-12 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3"
+              className="mt-16 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3"
             >
               <FeatureCard
                 icon={Briefcase}
@@ -263,12 +263,12 @@ export default function LandingPage() {
                 <h2 className="text-h1 text-text-primary">
                   Built different.
                 </h2>
-                <p className="mt-4 text-body text-text-secondary leading-relaxed">
+                <p className="mt-5 text-body text-text-secondary leading-relaxed">
                   Unlike traditional professional networks cluttered with noise
                   and distractions, LinkedOut focuses on what matters —
                   authentic connections and meaningful professional growth.
                 </p>
-                <ul className="mt-8 space-y-3">
+                <ul className="mt-10 space-y-4">
                   {[
                     "Clean, distraction-free interface designed for focus",
                     "Direct connections — no algorithm manipulation",
@@ -303,7 +303,7 @@ export default function LandingPage() {
                     size={24}
                     className="absolute top-6 right-6 text-text-tertiary"
                   />
-                  <div className="space-y-5">
+                    <div className="space-y-6">
                     <div className="flex items-center gap-3">
                       <div className="h-10 w-10 rounded-full bg-accent-subtle ring-2 ring-border" />
                       <div>
@@ -315,7 +315,7 @@ export default function LandingPage() {
                         </p>
                       </div>
                     </div>
-                    <p className="text-body leading-relaxed text-text-secondary">
+                    <p className="text-body text-text-secondary leading-relaxed">
                       &ldquo;LinkedOut completely changed how I think about
                       professional networking. No noise, no spam — just
                       genuine connections with people who share my
@@ -346,11 +346,11 @@ export default function LandingPage() {
               Ready to build your{" "}
               <span className="text-accent">professional network?</span>
             </h2>
-            <p className="mx-auto mt-3 max-w-md text-body text-text-secondary">
+            <p className="mx-auto mt-4 max-w-md text-body text-text-secondary leading-relaxed">
               Join thousands of professionals already using LinkedOut to make
               meaningful connections and advance their careers.
             </p>
-            <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-3">
+            <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4">
               <Link href="/signup">
                 <Button size="xl">
                   Get started free

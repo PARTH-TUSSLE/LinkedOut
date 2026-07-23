@@ -1,11 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Send } from "lucide-react";
 import { useAppSelector, useAppDispatch } from "@/store/hooks";
-import { addComment } from "@/store/thunks/postsThunks";
+import { fetchComments, addComment } from "@/store/thunks/postsThunks";
 import { Avatar } from "@/components/ui/Avatar";
 import { Button } from "@/components/ui/Button";
+import { CommentItem } from "@/components/posts/CommentItem";
 
 interface CommentSectionProps {
   postId: number;
@@ -14,8 +15,13 @@ interface CommentSectionProps {
 export function CommentSection({ postId }: CommentSectionProps) {
   const dispatch = useAppDispatch();
   const { user } = useAppSelector((state) => state.auth);
+  const comments = useAppSelector((state) => state.posts.comments[postId]);
   const [content, setContent] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  useEffect(() => {
+    dispatch(fetchComments(postId));
+  }, [dispatch, postId]);
 
   const handleSubmit = async () => {
     if (!content.trim()) return;
@@ -38,7 +44,14 @@ export function CommentSection({ postId }: CommentSectionProps) {
   };
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-4">
+      {comments && comments.length > 0 && (
+        <div className="space-y-3">
+          {comments.map((comment) => (
+            <CommentItem key={comment.commentId} comment={comment} />
+          ))}
+        </div>
+      )}
       <div className="flex gap-2">
         <Avatar src={user?.profilePicture} alt={user?.name || "You"} size="sm" />
         <div className="flex flex-1 items-center gap-2">

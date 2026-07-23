@@ -1,10 +1,10 @@
 import type { Metadata } from "next";
 import { Providers } from "./providers";
 import "@/styles/globals.css";
-import { Geist } from "next/font/google";
+import { Space_Grotesk } from "next/font/google";
 import { cn } from "@/lib/utils";
 
-const geist = Geist({subsets:['latin'],variable:'--font-sans'});
+const spaceGrotesk = Space_Grotesk({subsets:['latin'],variable:'--font-sans'});
 
 export const metadata: Metadata = {
   title: "LinkedOut — Professional Networking, Redefined",
@@ -18,7 +18,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className={cn("font-sans antialiased", geist.variable)}>
+    <html lang="en" className={cn("font-sans antialiased", spaceGrotesk.variable)}>
       <body>
         <Providers>{children}</Providers>
       </body>

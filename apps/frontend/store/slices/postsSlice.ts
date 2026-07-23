@@ -1,5 +1,10 @@
 import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
 import type { Post, Comment, Pagination } from "@/types";
+import {
+  fetchComments,
+  addComment as addCommentThunk,
+  deleteComment as deleteCommentThunk,
+} from "@/store/thunks/postsThunks";
 
 export interface PostsState {
   posts: Post[];
@@ -88,6 +93,34 @@ const postsSlice = createSlice({
         post.commentCount = (post.commentCount ?? 0) + action.payload.delta;
       }
     },
+  },
+  extraReducers: (builder) => {
+    builder.addCase(fetchComments.fulfilled, (state, action) => {
+      state.comments[action.payload.postId] = action.payload.comments;
+    });
+    builder.addCase(addCommentThunk.fulfilled, (state, action) => {
+      const { postId, comment } = action.payload;
+      if (!state.comments[postId]) {
+        state.comments[postId] = [];
+      }
+      state.comments[postId].push(comment);
+      const post = state.posts.find((p) => p.postId === postId);
+      if (post) {
+        post.commentCount = (post.commentCount ?? 0) + 1;
+      }
+    });
+    builder.addCase(deleteCommentThunk.fulfilled, (state, action) => {
+      const { postId, commentId } = action.payload;
+      if (state.comments[postId]) {
+        state.comments[postId] = state.comments[postId].filter(
+          (c) => c.commentId !== commentId
+        );
+      }
+      const post = state.posts.find((p) => p.postId === postId);
+      if (post) {
+        post.commentCount = Math.max(0, (post.commentCount ?? 0) - 1);
+      }
+    });
   },
 });
 

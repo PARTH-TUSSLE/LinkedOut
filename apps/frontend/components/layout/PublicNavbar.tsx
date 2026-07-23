@@ -17,7 +17,7 @@ export function PublicNavbar() {
       <div className="mx-auto flex h-12 max-w-6xl items-center justify-between px-4 sm:px-6">
         <Link
           href="/"
-          className="flex items-center gap-2.5 text-body-sm font-semibold text-text-primary"
+          className="flex items-center gap-2.5 text-body-sm font-semibold text-text-primary tracking-tight"
         >
           <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-accent text-accent-text shadow-sm">
             <Linkedin size={15} />
