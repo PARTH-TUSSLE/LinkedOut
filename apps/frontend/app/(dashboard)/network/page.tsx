@@ -112,14 +112,16 @@ export default function NetworkPage() {
                   >
                     @{profile.user?.username}
                   </Link>
-                  {profile.occupationStatus && (
-                    <p className="mt-1 text-caption text-text-secondary">
-                      {profile.occupationStatus}
-                    </p>
-                  )}
-                  {profile.location && (
-                    <p className="text-caption text-text-tertiary">{profile.location}</p>
-                  )}
+                  <div className="min-h-[2.5rem] space-y-0.5">
+                    {profile.occupationStatus && (
+                      <p className="text-caption text-text-secondary">
+                        {profile.occupationStatus}
+                      </p>
+                    )}
+                    {profile.location && (
+                      <p className="text-caption text-text-tertiary">{profile.location}</p>
+                    )}
+                  </div>
                 </div>
                 <div className="mt-4 flex justify-center">
                   <ConnectButton userId={profile.userId} />
