@@ -18,13 +18,13 @@ export const getProfileByUserIdController = async (
 
     let profile = await client.profile.findFirst({
       where: { userId },
-      include: { education: true, workHistory: true },
+      include: { education: true, workHistory: true, user: true },
     });
     // Create profile if it doesn't exist
     if (!profile) {
       profile = await client.profile.create({
         data: { userId },
-        include: { education: true, workHistory: true },
+        include: { education: true, workHistory: true, user: true },
       });
     }
 

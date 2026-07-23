@@ -28,7 +28,7 @@ export default function UserProfilePage() {
     dispatch(fetchUserProfile(userId))
       .unwrap()
       .then((result) => {
-        dispatch(setProfile(result.profile));
+        dispatch(setProfile({ ...result.profile, user: result.user }));
       })
       .catch(() => {})
       .finally(() => dispatch(setLoading(false)));
@@ -42,7 +42,7 @@ export default function UserProfilePage() {
     );
   }
 
-  if (!profile || !profile.user) {
+  if (!profile) {
     return (
       <div className="p-4">
         <ErrorState message="User not found" />
