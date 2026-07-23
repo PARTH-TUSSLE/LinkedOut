@@ -19,7 +19,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Badge } from "@/components/ui/Badge";
-import LandingBackground from "@/components/LandingBackground";
+import DotField from "@/components/DotField";
 
 const ease = [0.16, 1, 0.3, 1] as const;
 
@@ -88,7 +88,22 @@ export default function LandingPage() {
 
   return (
     <div className="relative">
-      <LandingBackground />
+      <div className="absolute inset-0 w-full h-full">
+        <DotField
+          dotRadius={1.5}
+          dotSpacing={14}
+          bulgeStrength={67}
+          glowRadius={160}
+          sparkle={false}
+          waveAmplitude={0}
+          cursorRadius={500}
+          cursorForce={0.1}
+          bulgeOnly
+          gradientFrom="#A855F7"
+          gradientTo="#B497CF"
+          glowColor="#120F17"
+        />
+      </div>
 
         {/* ═══ HERO ═══ */}
         <section className="relative flex min-h-[90vh] flex-col items-center justify-center px-4 pt-24 pb-20 overflow-hidden">
